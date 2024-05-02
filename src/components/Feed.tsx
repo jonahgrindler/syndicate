@@ -1,5 +1,13 @@
 import React from 'react';
-import {View, Text, Image, FlatList, StyleSheet} from 'react-native';
+import {useNavigation} from '@react-navigation/native';
+import {
+  View,
+  Text,
+  Image,
+  FlatList,
+  StyleSheet,
+  TouchableOpacity,
+} from 'react-native';
 import {FeedContent} from '../types/feedTypes';
 
 interface FeedProps {
@@ -7,20 +15,25 @@ interface FeedProps {
 }
 
 const Feed: React.FC<FeedProps> = ({feedContent}) => {
+  const navigation = useNavigation();
+  const handlePress = () => {
+    navigation.navigate('WebView', {url: item.link});
+  };
+
   return (
     <FlatList
       data={feedContent.items}
       horizontal={true}
       keyExtractor={item => item.id}
       renderItem={({item}) => (
-        <View style={styles.container}>
+        <TouchableOpacity onPress={handlePress} style={styles.container}>
           <Image
             source={require('../../assets/images/placeholder.jpg')}
             style={styles.image}
           />
           <Text style={styles.title}>{item.title}</Text>
           <Text>{item.published}</Text>
-        </View>
+        </TouchableOpacity>
       )}
     />
   );

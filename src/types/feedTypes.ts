@@ -4,6 +4,7 @@ export interface FeedItem {
   link?: string;
   content?: string;
   published?: string;
+  imageUrl?: undefined;
 }
 
 export interface FeedContent {

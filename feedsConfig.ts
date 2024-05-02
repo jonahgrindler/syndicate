@@ -10,6 +10,11 @@ const feeds = [
     title: 'Another Graphic',
     url: 'https://anothergraphic.org/feed/',
   },
+  {
+    id: 'feed3',
+    title: 'The Creative Independent',
+    url: 'https://thecreativeindependent.com/feed.xml',
+  },
 ];
 
 export default feeds;
