@@ -1,30 +1,43 @@
 import React from 'react';
 import {NavigationContainer} from '@react-navigation/native';
-import {createNativeStackNavigator} from '@react-navigation/native-stack';
-import {SafeAreaView, StatusBar, useColorScheme} from 'react-native';
-
-import {Colors} from 'react-native/Libraries/NewAppScreen';
+import {createStackNavigator} from '@react-navigation/stack';
+import {RootStackParamList} from './src/types/RootStackParamList';
 import FeedAggregator from './src/components/FeedAggregator';
 import FeedWebView from './src/components/FeedWebView';
+import Saved from './Saved';
+import Settings from './Settings';
+import Home from './Home';
 
-const Stack = createNativeStackNavigator();
+const Stack = createStackNavigator<RootStackParamList>();
 
 function App(): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
-
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
-  };
-
   return (
     <NavigationContainer>
       <Stack.Navigator
-        initialRouteName="FeedList"
+        initialRouteName="HomeScreen"
         screenOptions={{
-          headerShown: false,
+          headerShown: true,
         }}>
-        <Stack.Screen name="FeedAggregator" component={FeedAggregator} />
-        {/* <Stack.Screen name="FeedWebView" component={FeedWebView} /> */}
+        <Stack.Screen name="HomeScreen" component={Home} />
+        <Stack.Screen
+          name="SavedScreen"
+          component={Saved}
+          options={{
+            title: 'Saved',
+          }}
+        />
+        <Stack.Screen
+          name="SettingsScreen"
+          component={Settings}
+          options={{
+            title: 'Settings',
+          }}
+        />
+        {/* <Stack.Screen
+          name="FeedWebView"
+          component={FeedWebView}
+          options={{headerTitle: 'Web View'}}
+        /> */}
       </Stack.Navigator>
     </NavigationContainer>
   );
