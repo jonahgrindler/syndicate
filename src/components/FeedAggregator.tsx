@@ -3,20 +3,18 @@ import {
   View,
   Text,
   Image,
-  Button,
   ScrollView,
   StyleSheet,
   TouchableOpacity,
-  SafeAreaView,
-  StatusBar,
 } from 'react-native';
 import Feed from './Feed';
-import AddFeed from './AddFeed';
 import feedsConfig from '../../feedsConfig';
 import * as rssParser from 'react-native-rss-parser';
 import {useNavigation} from '@react-navigation/native';
 import {RootStackParamList} from '../types/RootStackParamList';
 import {StackNavigationProp} from '@react-navigation/stack';
+import {colors} from '../styles/theme';
+import {useFeedData} from '../context/FeedContext';
 
 const FeedAggregator: React.FC = () => {
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
@@ -28,7 +26,8 @@ const FeedAggregator: React.FC = () => {
       return acc;
     }, {} as {[key: string]: boolean}),
   );
-  const [feedData, setFeedData] = useState<any[]>([]);
+  // const [feedData, setFeedData] = useState<any[]>([]);
+  const {feedData, setFeedData} = useFeedData(); // from FeedContext
 
   // Toggle visibility of a feed
   const toggleFeedVisibility = (id: string) => {
@@ -36,12 +35,6 @@ const FeedAggregator: React.FC = () => {
       ...prevState,
       [id]: !prevState[id],
     }));
-  };
-
-  // Adding a new Feed
-  const handleAddFeed = (url: string) => {
-    const newFeed = {id: String(feeds.length + 1), url};
-    setFeeds(currentFeeds => [...currentFeeds, newFeed]);
   };
 
   useEffect(() => {
@@ -65,75 +58,58 @@ const FeedAggregator: React.FC = () => {
       }
     };
     fetchFeeds();
-  }, [feeds]);
-
-  const goToSettings = () => {
-    navigation.navigate('SettingsScreen');
-  };
-
-  const goToSaved = () => {
-    navigation.navigate('SavedScreen');
-  };
+  }, [feeds, setFeedData]);
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <StatusBar translucent={true} backgroundColor={'transparent'} />
-      <ScrollView style={styles.scrollView}>
-        {feedData.map(feed => (
-          <View key={feed.id}>
-            <TouchableOpacity
-              onPress={() => toggleFeedVisibility(feed.id)}
-              style={styles.titleRow}>
-              <View style={styles.imgTitle}>
-                {feed.parsed.image ? (
-                  <Image
-                    source={{uri: feed.parsed.image.url}}
-                    style={styles.favicon}
-                  />
-                ) : (
-                  <View
-                    style={[
-                      styles.favicon,
-                      {backgroundColor: feed.color || '#FF00FF'},
-                    ]}
-                  />
-                )}
+    <ScrollView style={styles.scrollView}>
+      {feedData.map(feed => (
+        <View key={feed.id} style={styles.channel}>
+          <TouchableOpacity
+            onPress={() => toggleFeedVisibility(feed.id)}
+            style={styles.titleRow}>
+            <View style={styles.imgTitle}>
+              {feed.parsed.image ? (
+                <Image
+                  source={{uri: feed.parsed.image.url}}
+                  style={styles.favicon}
+                />
+              ) : (
+                <View
+                  style={[
+                    styles.favicon,
+                    {backgroundColor: feed.color || '#FF00FF'},
+                  ]}
+                />
+              )}
 
-                <Text style={styles.title}>
-                  {feed.title || 'No Title Available'}
-                </Text>
-              </View>
-              {/* <Chevron /> */}
-              <Image
-                source={require('../../assets/icons/chevron.png')}
-                style={[
-                  styles.chevron,
-                  {
-                    transform: [
-                      {rotate: visibleFeeds[feed.id] ? '180deg' : '0deg'},
-                    ],
-                  },
-                ]}
-              />
-            </TouchableOpacity>
-            {visibleFeeds[feed.id] && <Feed feedContent={feed.parsed} />}
-          </View>
-        ))}
-        <AddFeed onAddFeed={handleAddFeed} />
-      </ScrollView>
-    </SafeAreaView>
+              <Text style={styles.title}>
+                {feed.title || 'No Title Available'}
+              </Text>
+            </View>
+            {/* <Chevron /> */}
+            <Image
+              source={require('../../assets/icons/chevron.png')}
+              style={[
+                styles.chevron,
+                {
+                  transform: [
+                    {rotate: visibleFeeds[feed.id] ? '180deg' : '0deg'},
+                  ],
+                },
+              ]}
+            />
+          </TouchableOpacity>
+          <>{visibleFeeds[feed.id] && <Feed feedContent={feed.parsed} />}</>
+        </View>
+      ))}
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
-  safeArea: {
-    backgroundColor: 'white',
-  },
   scrollView: {
-    // minHeight: '100%',
     backgroundColor: 'white',
     paddingTop: 16,
-    paddingBottom: 88,
   },
   titleRow: {
     flexDirection: 'row',
@@ -147,7 +123,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
-
   favicon: {
     width: 24,
     height: 24,
@@ -157,10 +132,15 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 18,
     fontWeight: 'bold',
+    color: colors.primary,
   },
   chevron: {
     width: 16,
     height: 16,
+  },
+  channel: {
+    flexGrow: 1,
+    flexShrink: 1,
   },
   input: {
     height: 40,

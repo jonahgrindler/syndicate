@@ -1,19 +1,28 @@
 import React from 'react';
 import {useNavigation} from '@react-navigation/native';
-import {NativeStackNavigationProp} from '@react-navigation/native-stack';
-import {Text, Image, View, StyleSheet, TouchableOpacity} from 'react-native';
+import {Text, Image, View, StyleSheet, Pressable} from 'react-native';
+import {RootStackParamList} from '../types/RootStackParamList';
+import {StackNavigationProp} from '@react-navigation/stack';
+import {colors, fonts} from '../styles/theme';
 
-const CarouselActions = () => {
+const CarouselActions = ({feedContent}) => {
+  const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
+
+  const goToChannelAllPosts = () => {
+    navigation.navigate('ChannelAllPosts', {feedContent});
+  };
+
   return (
     <>
       <View style={styles.carouselActions}>
         <View style={styles.button}>
-          <Image source={require('../../assets/icons/chevron.png')} />
-          <Text>Large Images</Text>
+          <Image source={require('../../assets/icons/expand.png')} />
+          <Text style={styles.buttonText}>Large Images</Text>
         </View>
-        <View style={styles.button}>
-          <Text>View All</Text>
-        </View>
+        <Pressable style={styles.button} onPress={goToChannelAllPosts}>
+          <Image source={require('../../assets/icons/view-all.png')} />
+          <Text style={styles.buttonText}>View All</Text>
+        </Pressable>
       </View>
       <View style={styles.line} />
     </>
@@ -31,7 +40,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-    fontSize: 15,
+  },
+  buttonText: {
+    fontSize: fonts.size.medium,
+    fontWeight: 'bold',
+    color: colors.primary,
   },
   line: {
     marginTop: 16,

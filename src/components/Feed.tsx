@@ -11,6 +11,7 @@ import {
 import {FeedProps, FeedItem} from '../types/FeedTypes';
 import {RootStackParamList} from '../types/RootStackParamList';
 import CarouselActions from './CarouselActions';
+import {colors, fonts, images, spacing} from '../styles/theme';
 
 const Feed: React.FC<FeedProps> = ({feedContent}) => {
   const navigation =
@@ -28,42 +29,57 @@ const Feed: React.FC<FeedProps> = ({feedContent}) => {
   return (
     <>
       <FlatList
-        data={feedContent.items}
         horizontal={true}
+        style={styles.flatList}
+        data={feedContent.items}
         keyExtractor={item => item.id}
         renderItem={({item}) => (
           <TouchableOpacity
             onPress={() => handlePress(item)}
-            style={styles.container}>
+            style={styles.postContainer}>
             <Image
               source={require('../../assets/images/placeholder.jpg')}
-              style={styles.image}
+              style={styles.postImage}
             />
             <Text style={styles.title}>{item.title}</Text>
-            <Text>{item.published}</Text>
+            <Text style={styles.subtext}>{item.published}</Text>
           </TouchableOpacity>
         )}
       />
-      <CarouselActions />
+      <CarouselActions feedContent={feedContent} />
     </>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    padding: 16,
+  flatList: {
     paddingTop: 8,
-    marginBottom: 8,
-    maxWidth: 288,
+    paddingLeft: 16,
+    paddingBottom: spacing.row,
+    height: 'auto',
+    flexGrow: 1,
+    flexShrink: 1,
+  },
+  postContainer: {
+    width: images.size.small.width,
     marginRight: 12,
+    height: 'auto',
+  },
+  postImage: {
+    width: images.size.small.width,
+    height: images.size.small.height,
+    marginBottom: 8,
+    borderRadius: images.radius.small,
   },
   title: {
     fontWeight: 'bold',
+    fontSize: fonts.size.medium,
+    color: colors.primary,
   },
-  image: {
-    width: 288,
-    maxHeight: 331,
-    marginBottom: 8,
+  subtext: {
+    fontSize: fonts.size.small,
+    color: colors.secondaryText,
+    marginTop: 4,
   },
 });
 

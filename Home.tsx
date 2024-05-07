@@ -1,44 +1,23 @@
 import React from 'react';
-import {Button, StyleSheet} from 'react-native';
-import {RootStackParamList} from './src/types/RootStackParamList';
-import {StackNavigationProp} from '@react-navigation/stack';
-import {useNavigation} from '@react-navigation/native';
+import {View, StyleSheet} from 'react-native';
+import {SafeAreaView, useSafeAreaInsets} from 'react-native-safe-area-context';
 import FeedAggregator from './src/components/FeedAggregator';
+import HomeTopNav from './src/components/HomeTopNav';
+import {colors} from './src/styles/theme';
 
 function Home() {
-  const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
-
-  const goToSettings = () => {
-    navigation.navigate('SettingsScreen');
-  };
-  const goToSaved = () => {
-    navigation.navigate('SavedScreen');
-  };
-
+  const insets = useSafeAreaInsets();
   return (
-    <>
+    <View style={styles.home}>
+      <HomeTopNav />
       <FeedAggregator />
-      <Button
-        title="Settings"
-        onPress={() => {
-          goToSettings();
-        }}
-      />
-      <Button
-        title="Saves"
-        onPress={() => {
-          goToSaved();
-        }}
-      />
-    </>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  center: {
+  home: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
   },
 });
 

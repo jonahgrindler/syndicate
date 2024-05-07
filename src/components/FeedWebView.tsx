@@ -7,33 +7,24 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import {WebView} from 'react-native-webview';
-import {
-  useNavigation,
-  RouteProp,
-  NavigationProp,
-} from '@react-navigation/native';
+import {useNavigation, RouteProp} from '@react-navigation/native';
 import {RootStackParamList} from '../types/RootStackParamList';
-import {NativeStackNavigationProp} from '@react-navigation/native-stack';
+import {StackNavigationProp} from '@react-navigation/stack';
+import {colors} from '../styles/theme';
 
 type WebViewProps = {
   route: RouteProp<RootStackParamList, 'FeedWebView'>;
 };
-type WebViewNavigationProp = NativeStackNavigationProp<
-  RootStackParamList,
-  'FeedWebView'
->;
 
 const FeedWebView: React.FC<WebViewProps> = ({route}) => {
   const {url} = route.params;
-  // const navigation = useNavigation<WebViewNavigationProp>();
-  const navigation =
-    useNavigation<NavigationProp<RootStackParamList, 'FeedWebView'>>();
+  const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
 
   return (
     <SafeAreaView style={styles.webView}>
       <WebView useWebKit={true} source={{uri: url}} style={styles.webView} />
       <View style={styles.bottomBar}>
-        <TouchableOpacity onPress={() => navigation.navigate('FeedAggregator')}>
+        <TouchableOpacity onPress={() => navigation.navigate('HomeScreen')}>
           <Image source={require('../../assets/icons/chevron-left.png')} />
         </TouchableOpacity>
         <Image source={require('../../assets/icons/save.png')} />
@@ -45,6 +36,7 @@ const FeedWebView: React.FC<WebViewProps> = ({route}) => {
 const styles = StyleSheet.create({
   webView: {
     flex: 1, // Ensures that the WebView takes up the full space of its container
+    backgroundColor: colors.background,
   },
   bottomBar: {
     height: 72,

@@ -44,6 +44,7 @@ export interface FeedItem {
 }
 
 export interface FeedContent {
+  parsed: FeedContent;
   title?: string;
   items: FeedItem[];
   image?: {

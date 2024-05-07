@@ -6,6 +6,8 @@ export type RootStackParamList = {
   FeedAggregator: undefined;
   HomeScreen: undefined;
   Feed: undefined;
+  AddFeed: {AddFeedProps: undefined};
+  ChannelAllPosts: {feedContent: undefined};
   FeedWebView: {url: string};
   SavedScreen: undefined;
   SettingsScreen: undefined;
