@@ -10,20 +10,27 @@ import {
 } from 'react-native';
 import {RootStackParamList} from '../types/RootStackParamList';
 import {StackNavigationProp} from '@react-navigation/stack';
-// import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {useNavigation} from '@react-navigation/native';
 import {SafeAreaView} from 'react-native-safe-area-context';
-import {useFeedData} from '../context/FeedContext';
+import {FeedItem} from '../types/FeedTypes';
 import {colors, fonts, images, spacing} from '../styles/theme';
 
 const ChannelAllPosts = ({route}) => {
   const {feedContent} = route.params;
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
-  const {feedData} = useFeedData();
+
+  const handlePress = (item: FeedItem) => {
+    // Assuming 'links' is an array and we want the first link
+    const firstUrl =
+      item.links && item.links.length > 0 ? item.links[0].url : null;
+    if (firstUrl) {
+      navigation.navigate('FeedWebView', {url: firstUrl});
+    }
+  };
 
   return (
-    <SafeAreaView edges={['top']}>
-      <View style={styles.center}>
+    <View style={styles.pageContainer}>
+      <SafeAreaView edges={['top']}>
         <View style={styles.navigation}>
           <TouchableOpacity
             onPress={() => {
@@ -37,36 +44,35 @@ const ChannelAllPosts = ({route}) => {
             <Image source={require('../../assets/icons/more.png')} />
           </TouchableOpacity>
         </View>
-        <FlatList
-          horizontal={false}
-          columnWrapperStyle={styles.columnWrapperStyle}
-          numColumns={2}
-          style={styles.flatList}
-          data={feedContent.items}
-          keyExtractor={item => item.id}
-          renderItem={({item}) => (
-            <TouchableOpacity
-              onPress={() => handlePress(item)}
-              style={styles.postContainer}>
-              <Image
-                source={require('../../assets/images/placeholder.jpg')}
-                style={styles.postImage}
-              />
-              <Text style={styles.title}>{item.title}</Text>
-              <Text style={styles.subtext}>{item.published}</Text>
-            </TouchableOpacity>
-          )}
-        />
-      </View>
-    </SafeAreaView>
+      </SafeAreaView>
+      <FlatList
+        horizontal={false}
+        columnWrapperStyle={styles.columnWrapperStyle}
+        numColumns={2}
+        style={styles.flatList}
+        data={feedContent.items}
+        keyExtractor={item => item.id}
+        renderItem={({item}) => (
+          <TouchableOpacity
+            onPress={() => handlePress(item)}
+            style={styles.postContainer}>
+            <Image
+              source={require('../../assets/images/placeholder.jpg')}
+              style={styles.postImage}
+            />
+            <Text style={styles.title}>{item.title}</Text>
+            <Text style={styles.subtext}>{item.published}</Text>
+          </TouchableOpacity>
+        )}
+      />
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
-  center: {
-    // flex: 1,
-    // alignItems: 'center',
-    // justifyContent: 'center',
+  pageContainer: {
+    backgroundColor: colors.background,
+    flex: 1,
   },
   navigation: {
     height: 72,

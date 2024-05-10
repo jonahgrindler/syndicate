@@ -14,7 +14,7 @@ import {RootStackParamList} from '../types/RootStackParamList';
 import {StackNavigationProp} from '@react-navigation/stack';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {colors, fonts, spacing} from '../styles/theme';
-
+import {getDBConnection, insertFeed} from '../database';
 import {useFeedData} from '../context/FeedContext';
 
 const AddFeed: React.FC = () => {
@@ -38,16 +38,22 @@ const AddFeed: React.FC = () => {
         // Parse the RSS feed data using your RSS parser
         const parsed = await rssParser.parse(responseData);
 
-        // Create a new feed object
-        const newFeed = {
-          id: String(feedData.length + 1), // Generate a unique ID for the new feed
+        // Insert new feed into database
+        const db = await getDBConnection();
+        await insertFeed(db, {
           url: newFeedUrl,
-          title: parsed.title, // Assuming 'title' is a property of the parsed data
-          parsed, // Store the parsed data directly
-        };
+        });
 
-        // Update your feed list state to include the new feed
-        setFeedData(currentFeeds => [...currentFeeds, newFeed]);
+        // // Create a new feed object
+        // const newFeed = {
+        //   id: String(feedData.length + 1), // Generate a unique ID for the new feed
+        //   url: newFeedUrl,
+        //   title: parsed.title, // Assuming 'title' is a property of the parsed data
+        //   parsed, // Store the parsed data directly
+        // };
+
+        // // Update your feed list state to include the new feed
+        // setFeedData(currentFeeds => [...currentFeeds, newFeed]);
 
         // Optionally, clear the input and provide any navigation or state reset you need
         setNewFeedUrl('');

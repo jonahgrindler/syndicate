@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useRef} from 'react';
 import {
   View,
   Text,
@@ -8,18 +8,19 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import Feed from './Feed';
-import feedsConfig from '../../feedsConfig';
+import {
+  setupSettingsTable,
+  initializeDataIfNeeded,
+  getDBConnection,
+  createTables,
+  getFeeds,
+} from '../database';
 import * as rssParser from 'react-native-rss-parser';
-import {useNavigation} from '@react-navigation/native';
-import {RootStackParamList} from '../types/RootStackParamList';
-import {StackNavigationProp} from '@react-navigation/stack';
 import {colors} from '../styles/theme';
 import {useFeedData} from '../context/FeedContext';
 
 const FeedAggregator: React.FC = () => {
-  const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
-
-  const [feeds, setFeeds] = useState(feedsConfig);
+  const [feeds, setFeeds] = useState<any[]>([]);
   const [visibleFeeds, setVisibleFeeds] = useState<{[key: string]: boolean}>(
     feeds.reduce((acc, feed) => {
       acc[feed.id] = false; // Initially all feeds are hidden
@@ -29,6 +30,31 @@ const FeedAggregator: React.FC = () => {
   // const [feedData, setFeedData] = useState<any[]>([]);
   const {feedData, setFeedData} = useFeedData(); // from FeedContext
 
+  useEffect(() => {
+    const loadFeeds = async () => {
+      try {
+        const db = await getDBConnection();
+        console.log('Database connection established');
+        await createTables(db);
+        console.log('Tables created or already exist');
+        await setupSettingsTable(db);
+        console.log('Settings table configured');
+        await initializeDataIfNeeded(db);
+        console.log('Data initialization checked');
+        const feedEntries = await getFeeds(db);
+        console.log('Feeds loaded:', feedEntries);
+        setFeeds(feedEntries);
+        const visibility = feedEntries.reduce((acc, feed) => {
+          acc[feed.id] = false; // Initially all feeds are hidden
+          return acc;
+        }, {});
+        setVisibleFeeds(visibility);
+      } catch (error) {
+        console.error('Failed to load feeds:', error);
+      }
+    };
+    loadFeeds();
+  }, []);
   // Toggle visibility of a feed
   const toggleFeedVisibility = (id: string) => {
     setVisibleFeeds(prevState => ({
@@ -37,28 +63,34 @@ const FeedAggregator: React.FC = () => {
     }));
   };
 
+  const fetchFeeds = async () => {
+    try {
+      const parsedFeeds = await Promise.all(
+        feeds.map(async feed => {
+          console.log('url:', feed.url, feed.id);
+          const response = await fetch(feed.url);
+          const responseData = await response.text();
+          const parsed = await rssParser.parse(responseData);
+          return {
+            ...feed,
+            title: parsed.title,
+            parsed,
+          };
+        }),
+      );
+      setFeedData(parsedFeeds);
+    } catch (error) {
+      console.error('Failed to fetch or parse feeds:', error);
+    }
+  };
+
+  const prevFeedsRef = useRef();
   useEffect(() => {
-    const fetchFeeds = async () => {
-      try {
-        const parsedFeeds = await Promise.all(
-          feeds.map(async feed => {
-            const response = await fetch(feed.url);
-            const responseData = await response.text();
-            const parsed = await rssParser.parse(responseData);
-            return {
-              ...feed,
-              title: parsed.title,
-              parsed,
-            };
-          }),
-        );
-        setFeedData(parsedFeeds);
-      } catch (error) {
-        console.error('Failed to fetch or parse feeds:', error);
-      }
-    };
-    fetchFeeds();
-  }, [feeds, setFeedData]);
+    if (prevFeedsRef.current !== feeds) {
+      fetchFeeds();
+    }
+    prevFeedsRef.current = feeds;
+  }, [feeds]); // Remove setFeedData if it's not changing or not necessary here
 
   return (
     <ScrollView style={styles.scrollView}>

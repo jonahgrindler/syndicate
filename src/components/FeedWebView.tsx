@@ -24,7 +24,7 @@ const FeedWebView: React.FC<WebViewProps> = ({route}) => {
     <SafeAreaView style={styles.webView}>
       <WebView useWebKit={true} source={{uri: url}} style={styles.webView} />
       <View style={styles.bottomBar}>
-        <TouchableOpacity onPress={() => navigation.navigate('HomeScreen')}>
+        <TouchableOpacity onPress={() => navigation.goBack()}>
           <Image source={require('../../assets/icons/chevron-left.png')} />
         </TouchableOpacity>
         <Image source={require('../../assets/icons/save.png')} />
