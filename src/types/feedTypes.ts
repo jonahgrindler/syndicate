@@ -39,6 +39,7 @@ export interface FeedItem {
   imageUrl?: string;
   itunes: Itunes;
   links: Link[];
+  link: string;
   published: string;
   title: string;
 }

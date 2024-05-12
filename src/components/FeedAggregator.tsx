@@ -14,6 +14,8 @@ import {
   getDBConnection,
   createTables,
   getFeeds,
+  insertPost,
+  fetchPostsForFeed,
 } from '../database';
 import * as rssParser from 'react-native-rss-parser';
 import {colors} from '../styles/theme';
@@ -63,34 +65,82 @@ const FeedAggregator: React.FC = () => {
     }));
   };
 
-  const fetchFeeds = async () => {
-    try {
-      const parsedFeeds = await Promise.all(
-        feeds.map(async feed => {
-          console.log('url:', feed.url, feed.id);
-          const response = await fetch(feed.url);
-          const responseData = await response.text();
-          const parsed = await rssParser.parse(responseData);
-          return {
-            ...feed,
-            title: parsed.title,
-            parsed,
-          };
-        }),
-      );
-      setFeedData(parsedFeeds);
-    } catch (error) {
-      console.error('Failed to fetch or parse feeds:', error);
+  const fetchAndStoreFeeds = async () => {
+    const db = await getDBConnection();
+    const newFeedData = [];
+
+    for (const feed of feeds) {
+      const posts = [];
+      try {
+        const response = await fetch(feed.channel_url);
+        const responseData = await response.text();
+        const parsed = await rssParser.parse(responseData);
+
+        for (const item of parsed.items) {
+          const uniqueId =
+            item.id || item.title || `${feed.channel_url}-${item.title}`;
+          const link = item.links[0].url;
+          console.log('link: ', link);
+          await insertPost(
+            db,
+            feed.channel_url,
+            item.title,
+            link,
+            item.description,
+            item.published,
+            uniqueId,
+          );
+        }
+        const fetchedPosts = await fetchPostsForFeed(db, feed.id);
+        posts.push(...fetchedPosts);
+        newFeedData.push({
+          ...feed,
+          title: parsed.title || 'No Title Available',
+          posts,
+        });
+      } catch (error) {
+        console.error('Failed to fetch or store feeds:', error);
+      }
     }
+    console.log('new FD:', newFeedData);
+    setFeedData(newFeedData); // Update state after all feeds are processed
   };
 
-  const prevFeedsRef = useRef();
   useEffect(() => {
-    if (prevFeedsRef.current !== feeds) {
-      fetchFeeds();
+    if (feeds.length > 0) {
+      fetchAndStoreFeeds();
     }
-    prevFeedsRef.current = feeds;
-  }, [feeds]); // Remove setFeedData if it's not changing or not necessary here
+  }, [feeds]);
+
+  // const fetchFeeds = async () => {
+  //   try {
+  //     const parsedFeeds = await Promise.all(
+  //       feeds.map(async feed => {
+  //         console.log('url:', feed.channel_url, feed.id);
+  //         const response = await fetch(feed.channel_url);
+  //         const responseData = await response.text();
+  //         const parsed = await rssParser.parse(responseData);
+
+  //         return {
+  //           ...feed,
+  //           title: parsed.title,
+  //           parsed,
+  //         };
+  //       }),
+  //     );
+  //     setFeedData(parsedFeeds);
+  //   } catch (error) {
+  //     console.error('Failed to fetch or parse feeds:', error);
+  //   }
+  // };
+
+  // const prevFeedsRef = useRef();
+  // useEffect(() => {
+  //   if (prevFeedsRef.current !== feeds) {
+  //     fetchFeeds();
+  //   }
+  //   prevFeedsRef.current = feeds;
+  // }, [feeds]); // Remove setFeedData if it's not changing or not necessary here
 
   return (
     <ScrollView style={styles.scrollView}>
@@ -100,7 +150,7 @@ const FeedAggregator: React.FC = () => {
             onPress={() => toggleFeedVisibility(feed.id)}
             style={styles.titleRow}>
             <View style={styles.imgTitle}>
-              {feed.parsed.image ? (
+              {/* {feed.parsed.image ? (
                 <Image
                   source={{uri: feed.parsed.image.url}}
                   style={styles.favicon}
@@ -112,7 +162,7 @@ const FeedAggregator: React.FC = () => {
                     {backgroundColor: feed.color || '#FF00FF'},
                   ]}
                 />
-              )}
+              )} */}
 
               <Text style={styles.title}>
                 {feed.title || 'No Title Available'}
@@ -131,7 +181,7 @@ const FeedAggregator: React.FC = () => {
               ]}
             />
           </TouchableOpacity>
-          <>{visibleFeeds[feed.id] && <Feed feedContent={feed.parsed} />}</>
+          <>{visibleFeeds[feed.id] && <Feed feedContent={feed.posts} />}</>
         </View>
       ))}
     </ScrollView>

@@ -18,12 +18,7 @@ const Feed: React.FC<FeedProps> = ({feedContent}) => {
     useNavigation<NativeStackNavigationProp<RootStackParamList, 'Feed'>>();
 
   const handlePress = (item: FeedItem) => {
-    // Assuming 'links' is an array and we want the first link
-    const firstUrl =
-      item.links && item.links.length > 0 ? item.links[0].url : null;
-    if (firstUrl) {
-      navigation.navigate('FeedWebView', {url: firstUrl});
-    }
+    navigation.navigate('FeedWebView', {url: item.link});
   };
 
   return (
@@ -31,8 +26,8 @@ const Feed: React.FC<FeedProps> = ({feedContent}) => {
       <FlatList
         horizontal={true}
         style={styles.flatList}
-        data={feedContent.items}
-        keyExtractor={item => item.id}
+        data={feedContent}
+        keyExtractor={item => item.post_id}
         renderItem={({item}) => (
           <TouchableOpacity
             onPress={() => handlePress(item)}

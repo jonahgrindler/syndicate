@@ -14,7 +14,7 @@ import {RootStackParamList} from '../types/RootStackParamList';
 import {StackNavigationProp} from '@react-navigation/stack';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {colors, fonts, spacing} from '../styles/theme';
-import {getDBConnection, insertFeed} from '../database';
+import {getDBConnection, parseFeed, insertFeed, insertPosts} from '../database';
 import {useFeedData} from '../context/FeedContext';
 
 const AddFeed: React.FC = () => {
@@ -31,18 +31,30 @@ const AddFeed: React.FC = () => {
         return;
       }
       try {
-        // Fetch the feed data from the provided URL
-        const response = await fetch(newFeedUrl);
-        const responseData = await response.text();
+        // // Fetch the feed data from the provided URL
+        // const response = await fetch(newFeedUrl);
+        // const responseData = await response.text();
 
-        // Parse the RSS feed data using your RSS parser
-        const parsed = await rssParser.parse(responseData);
+        // // Parse the RSS feed data using your RSS parser
+        // const parsed = await rssParser.parse(responseData);
+
+        const parsed = await parseFeed(newFeedUrl);
 
         // Insert new feed into database
         const db = await getDBConnection();
         await insertFeed(db, {
-          url: newFeedUrl,
+          channel_url: newFeedUrl,
+          title: parsed.title,
         });
+        await insertPosts(
+          db,
+          newFeedUrl,
+          parsed.items.map(item => ({
+            title: item.title,
+            description: item.description,
+            published: item.published,
+          })),
+        );
 
         // // Create a new feed object
         // const newFeed = {
