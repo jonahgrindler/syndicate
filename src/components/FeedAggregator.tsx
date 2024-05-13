@@ -12,12 +12,20 @@ import Feed from './Feed';
 import {colors, spacing} from '../styles/theme';
 import {useFeed} from '../context/FeedContext';
 import HomeRow from './HomeRow';
+import ResetDatabase from './ResetDatabase';
 
 const FeedAggregator: React.FC = () => {
-  const {feedData, visibleFeeds, toggleFeedVisibility, allPosts} = useFeed();
+  const {
+    feedData,
+    visibleFeeds,
+    toggleFeedVisibility,
+    allPosts,
+    savedPosts,
+    handleUnsavePost,
+  } = useFeed();
   const [showSaved, setShowSaved] = useState(false);
   const [showEverything, setShowEverything] = useState(false);
-  console.log(feedData);
+  const [showSettings, setShowSettings] = useState(true);
 
   return (
     <SafeAreaView edges={['top']} style={styles.safeAreaView}>
@@ -55,7 +63,7 @@ const FeedAggregator: React.FC = () => {
             style={[styles.chevron]}
           />
         </TouchableOpacity>
-        <>{showSaved && <Feed feedContent={feedData} />}</>
+        <>{showSaved && <Feed feedContent={savedPosts} />}</>
         <View style={styles.emptyRow} />
         {feedData.map(feed => (
           <View key={feed.id} style={styles.channel}>
@@ -93,10 +101,13 @@ const FeedAggregator: React.FC = () => {
           </View>
         ))}
         <View style={styles.emptyRow} />
-        <HomeRow
-          title={'Settings'}
-          image={require('../../assets/icons/ellipsis.png')}
-        />
+        <TouchableOpacity onPress={() => setShowSettings(toggle => !toggle)}>
+          <HomeRow
+            title={'Settings'}
+            image={require('../../assets/icons/ellipsis.png')}
+          />
+        </TouchableOpacity>
+        <>{showSettings && <ResetDatabase />}</>
       </ScrollView>
     </SafeAreaView>
   );

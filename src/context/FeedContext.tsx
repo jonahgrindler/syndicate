@@ -8,6 +8,9 @@ import {
   insertPost,
   fetchPostsForFeed,
   insertFeed,
+  getSavedPosts,
+  savePost,
+  unsavePost,
 } from '../database';
 import * as rssParser from 'react-native-rss-parser';
 import {Post} from '../types/FeedTypes';
@@ -22,6 +25,10 @@ const FeedContext = createContext({
   fetchAndStoreFeeds: () => {},
   allPosts: [],
   loadAllPosts: async () => {},
+  savedPosts: [],
+  handleSavePost: () => {},
+  handleUnsavePost: () => {},
+  getSavedPosts: () => {},
 });
 
 export const FeedProvider = ({children}) => {
@@ -29,6 +36,7 @@ export const FeedProvider = ({children}) => {
   const [feedData, setFeedData] = useState([]);
   const [visibleFeeds, setVisibleFeeds] = useState({});
   const [allPosts, setAllPosts] = useState([]);
+  const [savedPosts, setSavedPosts] = useState([]);
 
   // Initialize and load feeds
   useEffect(() => {
@@ -147,14 +155,35 @@ export const FeedProvider = ({children}) => {
       );
     }
 
-    // Sort posts by date
-    posts.sort((a, b) => new Date(b.published) - new Date(a.published));
+    posts.sort((a, b) => new Date(b.published) - new Date(a.published)); // Sort posts by date
     setAllPosts(posts);
   };
 
   useEffect(() => {
     loadAllPosts();
   }, []);
+
+  // Saved Posts
+  useEffect(() => {
+    const loadPosts = async () => {
+      const db = await getDBConnection();
+      const posts = await getSavedPosts(db);
+      setSavedPosts(posts);
+    };
+    loadPosts();
+  }, []);
+
+  const handleSavePost = async (postId: any) => {
+    const db = await getDBConnection();
+    await savePost(db, postId);
+    await getSavedPosts(db); // Reload saved posts
+  };
+
+  const handleUnsavePost = async (postId: any) => {
+    const db = await getDBConnection();
+    await unsavePost(db, postId);
+    await getSavedPosts(db); // Reload saved posts
+  };
 
   return (
     <FeedContext.Provider
@@ -167,6 +196,9 @@ export const FeedProvider = ({children}) => {
         refreshFeeds,
         allPosts,
         loadAllPosts,
+        savedPosts,
+        handleSavePost,
+        handleUnsavePost,
       }}>
       {children}
     </FeedContext.Provider>

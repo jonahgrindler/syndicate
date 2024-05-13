@@ -11,14 +11,17 @@ import {useNavigation, RouteProp} from '@react-navigation/native';
 import {RootStackParamList} from '../types/RootStackParamList';
 import {StackNavigationProp} from '@react-navigation/stack';
 import {colors} from '../styles/theme';
+import {useFeed} from '../context/FeedContext';
 
 type WebViewProps = {
   route: RouteProp<RootStackParamList, 'FeedWebView'>;
 };
 
 const FeedWebView: React.FC<WebViewProps> = ({route}) => {
-  const {url} = route.params;
+  const {url, postId} = route.params;
+  console.log('postId', postId);
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
+  const {handleSavePost} = useFeed();
 
   return (
     <SafeAreaView style={styles.webView}>
@@ -27,7 +30,9 @@ const FeedWebView: React.FC<WebViewProps> = ({route}) => {
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Image source={require('../../assets/icons/chevron-left.png')} />
         </TouchableOpacity>
-        <Image source={require('../../assets/icons/save.png')} />
+        <TouchableOpacity onPress={() => handleSavePost(postId)}>
+          <Image source={require('../../assets/icons/save.png')} />
+        </TouchableOpacity>
       </View>
     </SafeAreaView>
   );

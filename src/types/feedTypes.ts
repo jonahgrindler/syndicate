@@ -36,6 +36,7 @@ export interface FeedItem {
   description: string;
   enclosures: Enclosure[];
   id: string;
+  post_unique_id: string;
   imageUrl?: string;
   itunes: Itunes;
   links: Link[];

@@ -39,6 +39,7 @@ export const createTables = async db => {
       description TEXT, 
       published DATE, 
       post_unique_id TEXT UNIQUE,
+      is_saved BOOLEAN DEFAULT 0,
       FOREIGN KEY (channel_id) REFERENCES Channels (channel_id)
     );
   `;
@@ -216,6 +217,32 @@ export const insertPosts = async (db, channelUrl, posts) => {
     );
     // console.log(post);
   }
+};
+
+// Function to mark a post as saved
+export const savePost = async (db, postId) => {
+  await db.executeSql(
+    'UPDATE posts SET is_saved = 1 WHERE post_unique_id = ?',
+    [postId],
+  );
+};
+
+// Function to unmark a post as saved
+export const unsavePost = async (db, postId) => {
+  await db.executeSql(
+    'UPDATE posts SET is_saved = 0 WHERE post_unique_id = ?',
+    [postId],
+  );
+};
+
+// Function to fetch saved posts
+export const getSavedPosts = async db => {
+  const results = await db.executeSql('SELECT * FROM posts WHERE is_saved = 1');
+  let posts = [];
+  for (let i = 0; i < results[0].rows.length; i++) {
+    posts.push(results[0].rows.item(i));
+  }
+  return posts;
 };
 
 export const fetchPostsForFeed = async (db, feedId) => {

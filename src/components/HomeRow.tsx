@@ -4,9 +4,7 @@ import {colors} from '../styles/theme';
 
 const HomeRow: React.FC = ({image, title}) => {
   return (
-    <TouchableOpacity
-      // onPress={() => toggleFeedVisibility(feed.id)}
-      style={styles.titleRow}>
+    <View style={styles.titleRow}>
       <View style={styles.imgTitle}>
         <Image source={image} style={styles.favicon} />
         <Text style={styles.title}>{title}</Text>
@@ -15,7 +13,7 @@ const HomeRow: React.FC = ({image, title}) => {
         source={require('../../assets/icons/chevron.png')}
         style={[styles.chevron]}
       />
-    </TouchableOpacity>
+    </View>
   );
 };
 

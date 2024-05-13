@@ -18,7 +18,11 @@ const Feed: React.FC<FeedProps> = ({feedContent}) => {
     useNavigation<NativeStackNavigationProp<RootStackParamList, 'Feed'>>();
 
   const handlePress = (item: FeedItem) => {
-    navigation.navigate('FeedWebView', {url: item.link});
+    console.log('item:', item);
+    navigation.navigate('FeedWebView', {
+      url: item.link,
+      postId: item.post_unique_id,
+    });
   };
 
   return (

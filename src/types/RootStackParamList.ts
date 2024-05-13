@@ -8,7 +8,7 @@ export type RootStackParamList = {
   Feed: undefined;
   AddFeed: {AddFeedProps: undefined};
   ChannelAllPosts: {feedContent: undefined};
-  FeedWebView: {url: string};
+  FeedWebView: {url: string; postId: string};
   SavedScreen: undefined;
   SettingsScreen: undefined;
 };
