@@ -10,6 +10,7 @@ import {
   insertFeed,
 } from '../database';
 import * as rssParser from 'react-native-rss-parser';
+import {Post} from '../types/FeedTypes';
 
 const FeedContext = createContext({
   feeds: [],
@@ -19,12 +20,15 @@ const FeedContext = createContext({
   refreshFeeds: () => {},
   addNewFeed: () => {},
   fetchAndStoreFeeds: () => {},
+  allPosts: [],
+  loadAllPosts: async () => {},
 });
 
 export const FeedProvider = ({children}) => {
   const [feeds, setFeeds] = useState([]);
   const [feedData, setFeedData] = useState([]);
   const [visibleFeeds, setVisibleFeeds] = useState({});
+  const [allPosts, setAllPosts] = useState([]);
 
   // Initialize and load feeds
   useEffect(() => {
@@ -129,6 +133,29 @@ export const FeedProvider = ({children}) => {
   //   setFeeds(updatedFeeds);
   // };
 
+  const loadAllPosts = async () => {
+    const db = await getDBConnection();
+    const feeds = await getFeeds(db);
+    // let posts = [];
+    // let posts: Post[] = [];
+    let posts: any[] = [];
+
+    for (const feed of feeds) {
+      const fetchedPosts = await fetchPostsForFeed(db, feed.id);
+      posts = posts.concat(
+        fetchedPosts.map(post => ({...post, feedTitle: feed.title})),
+      );
+    }
+
+    // Sort posts by date
+    posts.sort((a, b) => new Date(b.published) - new Date(a.published));
+    setAllPosts(posts);
+  };
+
+  useEffect(() => {
+    loadAllPosts();
+  }, []);
+
   return (
     <FeedContext.Provider
       value={{
@@ -138,6 +165,8 @@ export const FeedProvider = ({children}) => {
         toggleFeedVisibility,
         addNewFeed,
         refreshFeeds,
+        allPosts,
+        loadAllPosts,
       }}>
       {children}
     </FeedContext.Provider>

@@ -53,7 +53,6 @@ const styles = StyleSheet.create({
     marginLeft: 16,
     height: 3,
     backgroundColor: colors.dark.line,
-    opacity: 0.1,
     borderRadius: 2,
   },
 });

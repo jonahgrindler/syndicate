@@ -66,7 +66,7 @@ const ChannelAllPosts = ({route}) => {
 
 const styles = StyleSheet.create({
   pageContainer: {
-    backgroundColor: colors.background,
+    backgroundColor: colors.dark.background,
     flex: 1,
   },
   navigation: {
@@ -82,12 +82,13 @@ const styles = StyleSheet.create({
     height: 40,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: colors.bgLight,
+    backgroundColor: colors.dark.bgLight,
     borderRadius: 40,
   },
   navTitle: {
     fontSize: fonts.size.large,
     fontWeight: fonts.weight.bold,
+    color: colors.dark.primary,
   },
   flatList: {
     paddingLeft: spacing.leftRightMargin,
@@ -115,11 +116,11 @@ const styles = StyleSheet.create({
   title: {
     fontWeight: 'bold',
     fontSize: fonts.size.medium,
-    color: colors.primary,
+    color: colors.dark.primary,
   },
   subtext: {
     fontSize: fonts.size.small,
-    color: colors.secondaryText,
+    color: colors.dark.secondaryText,
     marginTop: 4,
   },
 });

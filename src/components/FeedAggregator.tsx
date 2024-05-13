@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {
   View,
   Text,
@@ -12,10 +12,12 @@ import Feed from './Feed';
 import {colors, spacing} from '../styles/theme';
 import {useFeed} from '../context/FeedContext';
 import HomeRow from './HomeRow';
-import Settings from '../../Settings';
 
 const FeedAggregator: React.FC = () => {
-  const {feedData, visibleFeeds, toggleFeedVisibility} = useFeed();
+  const {feedData, visibleFeeds, toggleFeedVisibility, allPosts} = useFeed();
+  const [showSaved, setShowSaved] = useState(false);
+  const [showEverything, setShowEverything] = useState(false);
+  console.log(feedData);
 
   return (
     <SafeAreaView edges={['top']} style={styles.safeAreaView}>
@@ -23,7 +25,7 @@ const FeedAggregator: React.FC = () => {
         style={styles.scrollView}
         contentInset={{top: spacing.rowDouble, bottom: spacing.rowDouble}}>
         <TouchableOpacity
-          // onPress={() => toggleFeedVisibility(feed.id)}
+          onPress={() => setShowEverything(toggle => !toggle)}
           style={styles.titleRow}>
           <View style={styles.imgTitle}>
             <Image
@@ -37,8 +39,9 @@ const FeedAggregator: React.FC = () => {
             style={[styles.chevron]}
           />
         </TouchableOpacity>
+        <>{showEverything && <Feed feedContent={allPosts} />}</>
         <TouchableOpacity
-          // onPress={() => toggleFeedVisibility(feed.id)}
+          onPress={() => setShowSaved(toggle => !toggle)}
           style={styles.titleRow}>
           <View style={styles.imgTitle}>
             <Image
@@ -52,6 +55,7 @@ const FeedAggregator: React.FC = () => {
             style={[styles.chevron]}
           />
         </TouchableOpacity>
+        <>{showSaved && <Feed feedContent={feedData} />}</>
         <View style={styles.emptyRow} />
         {feedData.map(feed => (
           <View key={feed.id} style={styles.channel}>
