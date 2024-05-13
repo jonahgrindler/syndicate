@@ -11,6 +11,7 @@ import {
   getSavedPosts,
   savePost,
   unsavePost,
+  parseFeed,
 } from '../database';
 import * as rssParser from 'react-native-rss-parser';
 import {Post} from '../types/FeedTypes';
@@ -56,12 +57,15 @@ export const FeedProvider = ({children}) => {
     const feedsWithPosts = [];
 
     for (const feed of feeds) {
-      const response = await fetch(feed.channel_url);
-      const responseData = await response.text();
-      const parsed = await rssParser.parse(responseData);
+      // const response = await fetch(feed.channel_url);
+      // const responseData = await response.text();
+      // const parsed = await rssParser.parse(responseData);
+      const parsed = await parseFeed(feed.channel_url);
+      // console.log('parsed:', parsed);
 
       const posts = [];
       for (const item of parsed.items) {
+        console.log('item.imageUrl:', item.imageUrl);
         const uniqueId = item.id || `${feed.channel_url}-${item.title}`;
         const link = item.links[0].url;
         await insertPost(
@@ -71,6 +75,7 @@ export const FeedProvider = ({children}) => {
           link,
           item.description,
           item.published,
+          item.imageUrl,
           uniqueId,
         );
         posts.push({
@@ -78,6 +83,7 @@ export const FeedProvider = ({children}) => {
           link: link,
           description: item.description,
           published: item.published,
+          imageUrl: item.imageUrl,
           post_unique_id: uniqueId,
         });
       }

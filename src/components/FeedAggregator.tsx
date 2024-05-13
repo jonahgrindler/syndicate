@@ -53,7 +53,11 @@ const FeedAggregator: React.FC = () => {
           style={styles.titleRow}>
           <View style={styles.imgTitle}>
             <Image
-              source={require('../../assets/icons/save.png')}
+              source={
+                showSaved
+                  ? require('../../assets/icons/save-fill.png')
+                  : require('../../assets/icons/save.png')
+              }
               style={styles.favicon}
             />
             <Text style={styles.title}>Saved</Text>

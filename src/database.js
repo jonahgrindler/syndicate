@@ -38,6 +38,7 @@ export const createTables = async db => {
       link TEXT,
       description TEXT, 
       published DATE, 
+      imageUrl TEXT, 
       post_unique_id TEXT UNIQUE,
       is_saved BOOLEAN DEFAULT 0,
       FOREIGN KEY (channel_id) REFERENCES Channels (channel_id)
@@ -120,8 +121,34 @@ export const initializeDatabase = async db => {
 export const parseFeed = async url => {
   try {
     const response = await fetch(url);
-    const data = await response.text();
-    return rssParser.parse(data);
+    const responseData = await response.text();
+    const parsed = await rssParser.parse(responseData);
+
+    // Transform the parsed data to include imageUrl directly in each item if available
+    const itemsWithImages = parsed.items.map(item => {
+      let imageUrl = '';
+      if (
+        item.enclosures &&
+        item.enclosures.some(enc => enc.type.startsWith('image'))
+      ) {
+        imageUrl = item.enclosures.find(enc =>
+          enc.type.startsWith('image'),
+        ).url;
+      } else if (item.content) {
+        // Optionally extract from content
+        const regex = /<img.*?src=['"](.*?)['"]/i;
+        const match = regex.exec(item.content);
+        if (match) {
+          imageUrl = match[1];
+        }
+      }
+      return {...item, imageUrl};
+    });
+
+    return {
+      ...parsed,
+      items: itemsWithImages,
+    };
   } catch (error) {
     console.error('Failed to fetch or parse feed:', error);
     throw error;
@@ -132,7 +159,7 @@ export const insertFeed = async (db, feed) => {
   const {channel_url} = feed;
   console.log('url', channel_url);
   const parsed = await parseFeed(channel_url);
-  console.log(parsed);
+  // console.log(parsed.image.url);
 
   try {
     const insertQuery = `
@@ -162,6 +189,7 @@ export const insertPost = async (
   link,
   description,
   published,
+  imageUrl,
   uniqueId,
 ) => {
   try {
@@ -181,17 +209,20 @@ export const insertPost = async (
           link, 
           description, 
           published, 
+          imageUrl, 
           post_unique_id
-        ) VALUES (?, ?, ?, ?, ?, ?);
+        ) VALUES (?, ?, ?, ?, ?, ?, ?);
       `;
-      const insertResults = await db.executeSql(insertQuery, [
+      await db.executeSql(insertQuery, [
         channel_id,
         title,
         link,
         description,
         published,
+        imageUrl,
         uniqueId,
       ]);
+      console.log('imageUrl:', imageUrl);
       // console.log(
       //   `Inserted ${insertResults[0].rowsAffected} post(s) with unique ID: ${uniqueId} for channel: ${channel_id}`,
       // );
@@ -213,6 +244,7 @@ export const insertPosts = async (db, channelUrl, posts) => {
       post.link,
       post.description,
       post.published,
+      post.imageUrl,
       post.uniqueId,
     );
     // console.log(post);

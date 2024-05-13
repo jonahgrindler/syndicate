@@ -36,10 +36,15 @@ const Feed: React.FC<FeedProps> = ({feedContent}) => {
           <TouchableOpacity
             onPress={() => handlePress(item)}
             style={styles.postContainer}>
-            <Image
-              source={require('../../assets/images/placeholder.jpg')}
-              style={styles.postImage}
-            />
+            {item.imageUrl ? (
+              <Image source={{uri: item.imageUrl}} style={styles.postImage} />
+            ) : (
+              <Image
+                source={require('../../assets/images/placeholder.jpg')}
+                style={styles.postImage}
+              />
+            )}
+
             <Text style={styles.title}>{item.title}</Text>
             <Text style={styles.subtext}>{item.published}</Text>
           </TouchableOpacity>
