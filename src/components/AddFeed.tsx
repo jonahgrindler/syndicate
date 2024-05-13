@@ -9,18 +9,16 @@ import {
   TouchableOpacity,
   Image,
 } from 'react-native';
-import * as rssParser from 'react-native-rss-parser';
 import {RootStackParamList} from '../types/RootStackParamList';
 import {StackNavigationProp} from '@react-navigation/stack';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {colors, fonts, spacing} from '../styles/theme';
-import {getDBConnection, parseFeed, insertFeed, insertPosts} from '../database';
-import {useFeedData} from '../context/FeedContext';
+import {useFeed} from '../context/FeedContext';
 
 const AddFeed: React.FC = () => {
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
 
-  const {feedData, setFeedData} = useFeedData();
+  const {addNewFeed} = useFeed();
   const [newFeedUrl, setNewFeedUrl] = useState('');
 
   // Adding a new Feed
@@ -31,43 +29,7 @@ const AddFeed: React.FC = () => {
         return;
       }
       try {
-        // // Fetch the feed data from the provided URL
-        // const response = await fetch(newFeedUrl);
-        // const responseData = await response.text();
-
-        // // Parse the RSS feed data using your RSS parser
-        // const parsed = await rssParser.parse(responseData);
-
-        const parsed = await parseFeed(newFeedUrl);
-
-        // Insert new feed into database
-        const db = await getDBConnection();
-        await insertFeed(db, {
-          channel_url: newFeedUrl,
-          title: parsed.title,
-        });
-        await insertPosts(
-          db,
-          newFeedUrl,
-          parsed.items.map(item => ({
-            title: item.title,
-            description: item.description,
-            published: item.published,
-          })),
-        );
-
-        // // Create a new feed object
-        // const newFeed = {
-        //   id: String(feedData.length + 1), // Generate a unique ID for the new feed
-        //   url: newFeedUrl,
-        //   title: parsed.title, // Assuming 'title' is a property of the parsed data
-        //   parsed, // Store the parsed data directly
-        // };
-
-        // // Update your feed list state to include the new feed
-        // setFeedData(currentFeeds => [...currentFeeds, newFeed]);
-
-        // Optionally, clear the input and provide any navigation or state reset you need
+        await addNewFeed(newFeedUrl);
         setNewFeedUrl('');
         navigation.goBack();
       } catch (error) {
@@ -75,9 +37,6 @@ const AddFeed: React.FC = () => {
       }
     };
     fetchFeed();
-
-    // setNewFeedUrl(''); // Reset input after adding
-    // navigation.goBack();
   };
 
   return (
@@ -108,7 +67,7 @@ const AddFeed: React.FC = () => {
 };
 const styles = StyleSheet.create({
   safeView: {
-    backgroundColor: colors.background,
+    backgroundColor: colors.dark.background,
     flex: 1,
   },
   navigation: {
@@ -124,7 +83,7 @@ const styles = StyleSheet.create({
     height: 40,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: colors.bgLight,
+    backgroundColor: colors.dark.bgLight,
     borderRadius: 40,
   },
   input: {
@@ -133,11 +92,11 @@ const styles = StyleSheet.create({
     margin: 12,
     padding: 10,
     paddingLeft: 20,
-    backgroundColor: colors.bgLight,
+    backgroundColor: colors.dark.bgLight,
     fontSize: fonts.size.large,
   },
   button: {
-    color: colors.primary,
+    color: colors.dark.primary,
   },
 });
 

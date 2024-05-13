@@ -20,12 +20,7 @@ const ChannelAllPosts = ({route}) => {
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
 
   const handlePress = (item: FeedItem) => {
-    // Assuming 'links' is an array and we want the first link
-    const firstUrl =
-      item.links && item.links.length > 0 ? item.links[0].url : null;
-    if (firstUrl) {
-      navigation.navigate('FeedWebView', {url: firstUrl});
-    }
+    navigation.navigate('FeedWebView', {url: item.link});
   };
 
   return (
@@ -50,7 +45,7 @@ const ChannelAllPosts = ({route}) => {
         columnWrapperStyle={styles.columnWrapperStyle}
         numColumns={2}
         style={styles.flatList}
-        data={feedContent.items}
+        data={feedContent}
         keyExtractor={item => item.id}
         renderItem={({item}) => (
           <TouchableOpacity

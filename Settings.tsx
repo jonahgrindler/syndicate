@@ -4,6 +4,7 @@ import {RootStackParamList} from './src/types/RootStackParamList';
 import {StackNavigationProp} from '@react-navigation/stack';
 // import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {useNavigation} from '@react-navigation/native';
+import ResetDatabase from './src/components/ResetDatabase';
 
 function Settings() {
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
@@ -15,12 +16,7 @@ function Settings() {
   return (
     <View style={styles.center}>
       <Text>Settings</Text>
-      <Button
-        title="Go to Saved"
-        onPress={() => {
-          goToSaved();
-        }}
-      />
+      <ResetDatabase />
       <Button
         title="Go Back"
         onPress={() => {

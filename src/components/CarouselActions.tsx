@@ -44,7 +44,7 @@ const styles = StyleSheet.create({
   buttonText: {
     fontSize: fonts.size.medium,
     fontWeight: 'bold',
-    color: colors.primary,
+    color: colors.dark.primary,
   },
   line: {
     marginTop: 16,
@@ -52,7 +52,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     marginLeft: 16,
     height: 3,
-    backgroundColor: '#3A4048',
+    backgroundColor: colors.dark.line,
     opacity: 0.1,
     borderRadius: 2,
   },

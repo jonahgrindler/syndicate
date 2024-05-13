@@ -44,17 +44,41 @@ export interface FeedItem {
   title: string;
 }
 
-export interface FeedContent {
-  parsed: FeedContent;
-  title?: string;
-  items: FeedItem[];
-  image?: {
-    url: string;
-  };
-}
-
 // Now your FeedProps type definition using the FeedContent type.
 export interface FeedProps {
   feedContent: FeedContent;
   feedItem?: FeedItem;
+}
+
+export interface Feed {
+  id: string;
+  title: string;
+  channel_url: string;
+  image?: string;
+  posts?: Post[];
+}
+
+export interface Post {
+  id: string;
+  title: string;
+  link: string;
+  description?: string;
+  published?: string;
+}
+
+export interface FeedContent {
+  id: string;
+  parsed: FeedContent;
+  posts: Post[];
+  title?: string;
+  items: FeedItem[];
+  image?: string;
+}
+
+export interface FeedContextType {
+  feeds: Feed[];
+  feedData: Feed[];
+  visibleFeeds: {[key: string]: boolean};
+  toggleFeedVisibility: (id: string) => void;
+  refreshFeeds: () => Promise<void>;
 }

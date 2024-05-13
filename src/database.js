@@ -25,8 +25,9 @@ export const createTables = async db => {
   const queryFeeds = `
     CREATE TABLE IF NOT EXISTS feeds (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
-      channel_url TEXT,
-      title TEXT
+      channel_url TEXT UNIQUE,
+      title TEXT,
+      image TEXT
     );
   `;
   const queryPosts = `
@@ -65,8 +66,9 @@ export const setupDefaultFeeds = async (db, userId) => {
     },
   ];
   const insertFeedSql = `INSERT INTO feeds (channel_url, title) VALUES (?, ?);`;
+
   for (let feed of defaultFeeds) {
-    await db.executeSql(insertFeedSql, [feed.channel_url]);
+    await insertFeed(db, {channel_url: feed.channel_url});
   }
 };
 
@@ -126,13 +128,26 @@ export const parseFeed = async url => {
 };
 
 export const insertFeed = async (db, feed) => {
-  const {url} = feed;
+  const {channel_url} = feed;
+  console.log('url', channel_url);
+  const parsed = await parseFeed(channel_url);
+  console.log(parsed);
+
   try {
     const insertQuery = `
-      INSERT INTO feeds (channel_url, title) VALUES (?, ?);
+      INSERT OR IGNORE INTO feeds (channel_url, title, image) VALUES (?, ?, ?);
   `;
-    await db.executeSql(insertQuery, [url]);
-    console.log('Feed added successfully:', url);
+    await db.executeSql(insertQuery, [
+      channel_url,
+      parsed.title,
+      parsed.image.url,
+    ]);
+    console.log(
+      'Feed added successfully:',
+      channel_url,
+      'image:',
+      parsed.image.url,
+    );
   } catch (error) {
     console.error('Failed to add feed:', error);
     throw error;
@@ -176,9 +191,9 @@ export const insertPost = async (
         published,
         uniqueId,
       ]);
-      console.log(
-        `Inserted ${insertResults[0].rowsAffected} post(s) with unique ID: ${uniqueId} for channel: ${channel_id}`,
-      );
+      // console.log(
+      //   `Inserted ${insertResults[0].rowsAffected} post(s) with unique ID: ${uniqueId} for channel: ${channel_id}`,
+      // );
     } else {
       console.error('No channel found with URL:', channelUrl);
     }
@@ -199,7 +214,7 @@ export const insertPosts = async (db, channelUrl, posts) => {
       post.published,
       post.uniqueId,
     );
-    console.log(post);
+    // console.log(post);
   }
 };
 

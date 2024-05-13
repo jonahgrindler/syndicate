@@ -27,7 +27,7 @@ const Feed: React.FC<FeedProps> = ({feedContent}) => {
         horizontal={true}
         style={styles.flatList}
         data={feedContent}
-        keyExtractor={item => item.post_id}
+        keyExtractor={item => item.post_unique_id}
         renderItem={({item}) => (
           <TouchableOpacity
             onPress={() => handlePress(item)}
@@ -69,11 +69,11 @@ const styles = StyleSheet.create({
   title: {
     fontWeight: 'bold',
     fontSize: fonts.size.medium,
-    color: colors.primary,
+    color: colors.dark.primary,
   },
   subtext: {
     fontSize: fonts.size.small,
-    color: colors.secondaryText,
+    color: colors.dark.secondaryText,
     marginTop: 4,
   },
 });

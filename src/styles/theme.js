@@ -1,9 +1,21 @@
 export const colors = {
   primary: '#3A4048',
+  slate: '#3A4048',
+  grey: '#5C6673',
   secondaryText: 'rgba(58,64,72,0.4)',
   bgLight: 'rgba(58,64,72,0.05)',
   background: '#ffffff',
   error: '#ff4757',
+  dark: {
+    primary: '#fff',
+    slate: '#3A4048',
+    grey: '#5C6673',
+    secondaryText: 'rgba(255,255,255,0.4)',
+    bgLight: 'rgba(58,64,72,0.05)',
+    background: '#000',
+    error: '#ff4757',
+    line: 'rgba(184,192,204,0.14)',
+  },
 };
 
 export const fonts = {
