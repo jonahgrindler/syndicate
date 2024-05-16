@@ -18,10 +18,15 @@ type WebViewProps = {
 };
 
 const FeedWebView: React.FC<WebViewProps> = ({route}) => {
+  const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
+  const {handleSavePost, handleUnsavePost, savedPosts} = useFeed();
   const {url, postId} = route.params;
   console.log('postId', postId);
-  const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
-  const {handleSavePost} = useFeed();
+  console.log(savedPosts);
+  const isSaved = savedPosts.some(
+    savedPost => savedPost.post_unique_id === postId,
+  );
+  console.log(isSaved);
 
   return (
     <SafeAreaView style={styles.webView}>
@@ -30,9 +35,15 @@ const FeedWebView: React.FC<WebViewProps> = ({route}) => {
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Image source={require('../../assets/icons/chevron-left.png')} />
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => handleSavePost(postId)}>
-          <Image source={require('../../assets/icons/save.png')} />
-        </TouchableOpacity>
+        {isSaved ? (
+          <TouchableOpacity onPress={() => handleUnsavePost(postId)}>
+            <Image source={require('../../assets/icons/save-fill.png')} />
+          </TouchableOpacity>
+        ) : (
+          <TouchableOpacity onPress={() => handleSavePost(postId)}>
+            <Image source={require('../../assets/icons/save.png')} />
+          </TouchableOpacity>
+        )}
       </View>
     </SafeAreaView>
   );

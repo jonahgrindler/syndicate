@@ -1,28 +1,69 @@
 import React from 'react';
 import {useNavigation} from '@react-navigation/native';
-import {Text, Image, View, StyleSheet, Pressable} from 'react-native';
+import {Text, Image, View, StyleSheet, Pressable, Animated} from 'react-native';
 import {RootStackParamList} from '../types/RootStackParamList';
 import {StackNavigationProp} from '@react-navigation/stack';
 import {colors, fonts} from '../styles/theme';
 
-const CarouselActions = ({feedContent}) => {
+const CarouselActions = ({feedContent, handleLargeImages, largeImages}) => {
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
 
   const goToChannelAllPosts = () => {
     navigation.navigate('ChannelAllPosts', {feedContent});
   };
 
+  const animation = new Animated.Value(0);
+  const inputRange = [0, 1];
+  const outputRange = [1, 0.9];
+  const scale = animation.interpolate({inputRange, outputRange});
+
+  const onPressIn = () => {
+    Animated.spring(animation, {
+      toValue: 1,
+      useNativeDriver: true,
+    }).start();
+  };
+  const onPressOut = () => {
+    Animated.spring(animation, {
+      toValue: 0,
+      useNativeDriver: true,
+    }).start();
+  };
+
   return (
     <>
       <View style={styles.carouselActions}>
-        <View style={styles.button}>
-          <Image source={require('../../assets/icons/expand.png')} />
-          <Text style={styles.buttonText}>Large Images</Text>
-        </View>
-        <Pressable style={styles.button} onPress={goToChannelAllPosts}>
-          <Image source={require('../../assets/icons/view-all.png')} />
-          <Text style={styles.buttonText}>View All</Text>
-        </Pressable>
+        <Animated.View style={[styles.button, {transform: [{scale}]}]}>
+          <Pressable
+            style={styles.button}
+            activeOpacity={1}
+            onPressIn={onPressIn}
+            onPressOut={onPressOut}
+            onPress={handleLargeImages}>
+            {largeImages ? (
+              <>
+                <Image source={require('../../assets/icons/expand.png')} />
+                <Text style={styles.buttonText}>Large Images</Text>
+              </>
+            ) : (
+              <>
+                <Image source={require('../../assets/icons/shrink.png')} />
+                <Text style={styles.buttonText}>Small Images</Text>
+              </>
+            )}
+          </Pressable>
+        </Animated.View>
+        <Animated.View style={[styles.button, {transform: [{scale}]}]}>
+          <Pressable
+            style={styles.button}
+            activeOpacity={1}
+            onPressIn={onPressIn}
+            onPressOut={onPressOut}
+            onPress={goToChannelAllPosts}>
+            <Image source={require('../../assets/icons/view-all.png')} />
+            <Text style={styles.buttonText}>View All</Text>
+          </Pressable>
+        </Animated.View>
       </View>
       <View style={styles.line} />
     </>

@@ -15,14 +15,8 @@ import HomeRow from './HomeRow';
 import ResetDatabase from './ResetDatabase';
 
 const FeedAggregator: React.FC = () => {
-  const {
-    feedData,
-    visibleFeeds,
-    toggleFeedVisibility,
-    allPosts,
-    savedPosts,
-    handleUnsavePost,
-  } = useFeed();
+  const {feedData, visibleFeeds, toggleFeedVisibility, allPosts, savedPosts} =
+    useFeed();
   const [showSaved, setShowSaved] = useState(false);
   const [showEverything, setShowEverything] = useState(false);
   const [showSettings, setShowSettings] = useState(true);
@@ -85,7 +79,7 @@ const FeedAggregator: React.FC = () => {
                     ]}
                   />
                 )}
-                <Text style={styles.title}>
+                <Text style={styles.title} numberOfLines={1}>
                   {feed.title || 'No Title Available'}
                 </Text>
               </View>
@@ -137,6 +131,7 @@ const styles = StyleSheet.create({
   imgTitle: {
     flexDirection: 'row',
     alignItems: 'center',
+    paddingRight: 12,
   },
   favicon: {
     width: 24,
@@ -148,6 +143,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     color: colors.dark.primary,
+    flex: 1,
   },
   chevron: {
     width: 16,

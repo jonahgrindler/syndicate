@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {useNavigation} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {
@@ -7,6 +7,7 @@ import {
   FlatList,
   StyleSheet,
   TouchableOpacity,
+  Button,
 } from 'react-native';
 import {FeedProps, FeedItem} from '../types/FeedTypes';
 import {RootStackParamList} from '../types/RootStackParamList';
@@ -16,13 +17,18 @@ import {colors, fonts, images, spacing} from '../styles/theme';
 const Feed: React.FC<FeedProps> = ({feedContent}) => {
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList, 'Feed'>>();
+  const [largeImages, setLargeImages] = useState(true);
 
-  const handlePress = (item: FeedItem) => {
+  const handleNavigation = (item: FeedItem) => {
     console.log('item:', item);
     navigation.navigate('FeedWebView', {
       url: item.link,
       postId: item.post_unique_id,
     });
+  };
+
+  const handleLargeImages = () => {
+    setLargeImages(prevSize => !prevSize);
   };
 
   return (
@@ -34,14 +40,26 @@ const Feed: React.FC<FeedProps> = ({feedContent}) => {
         keyExtractor={item => item.post_unique_id}
         renderItem={({item}) => (
           <TouchableOpacity
-            onPress={() => handlePress(item)}
-            style={styles.postContainer}>
+            onPress={() => handleNavigation(item)}
+            style={[
+              styles.postContainer,
+              largeImages ? styles.smallPost : styles.largePost,
+            ]}>
             {item.imageUrl ? (
-              <Image source={{uri: item.imageUrl}} style={styles.postImage} />
+              <Image
+                source={{uri: item.imageUrl}}
+                style={[
+                  styles.postImage,
+                  largeImages ? styles.smallImage : styles.largeImage,
+                ]}
+              />
             ) : (
               <Image
                 source={require('../../assets/images/placeholder.jpg')}
-                style={styles.postImage}
+                style={[
+                  styles.postImage,
+                  largeImages ? styles.smallImage : styles.largeImage,
+                ]}
               />
             )}
 
@@ -50,7 +68,11 @@ const Feed: React.FC<FeedProps> = ({feedContent}) => {
           </TouchableOpacity>
         )}
       />
-      <CarouselActions feedContent={feedContent} />
+      <CarouselActions
+        feedContent={feedContent}
+        handleLargeImages={handleLargeImages}
+        largeImages={largeImages}
+      />
     </>
   );
 };
@@ -65,15 +87,28 @@ const styles = StyleSheet.create({
     flexShrink: 1,
   },
   postContainer: {
-    width: images.size.small.width,
     marginRight: 12,
     height: 'auto',
   },
-  postImage: {
+  smallPost: {
     width: images.size.small.width,
-    height: images.size.small.height,
+    height: 'auto',
+  },
+  largePost: {
+    width: images.size.large.width,
+    height: 'auto',
+  },
+  postImage: {
     marginBottom: 8,
     borderRadius: images.radius.small,
+  },
+  smallImage: {
+    width: images.size.small.width,
+    height: images.size.small.height,
+  },
+  largeImage: {
+    width: images.size.large.width,
+    height: images.size.large.height,
   },
   title: {
     fontWeight: 'bold',

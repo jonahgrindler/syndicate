@@ -27,7 +27,8 @@ export const createTables = async db => {
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       channel_url TEXT UNIQUE,
       title TEXT,
-      image TEXT
+      image TEXT,
+      image_size BOOLEAN DEFAULT 0
     );
   `;
   const queryPosts = `
@@ -65,6 +66,18 @@ export const setupDefaultFeeds = async (db, userId) => {
     {
       channel_url: 'https://thecreativeindependent.com/feed.xml',
       title: 'The Creative Independent',
+    },
+    {
+      channel_url: 'https://www.hoverstat.es/rss.xml',
+      title: 'hoverstat.es',
+    },
+    {
+      channel_url: 'https://sidebar.io/feed.xml',
+      title: 'Sidebar',
+    },
+    {
+      channel_url: 'https://feeds.feedburner.com/pudding/feed',
+      title: 'The Pudding',
     },
   ];
   const insertFeedSql = `INSERT INTO feeds (channel_url, title) VALUES (?, ?);`;

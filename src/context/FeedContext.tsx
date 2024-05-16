@@ -33,11 +33,11 @@ const FeedContext = createContext({
 });
 
 export const FeedProvider = ({children}) => {
-  const [feeds, setFeeds] = useState([]);
-  const [feedData, setFeedData] = useState([]);
-  const [visibleFeeds, setVisibleFeeds] = useState({});
-  const [allPosts, setAllPosts] = useState([]);
-  const [savedPosts, setSavedPosts] = useState([]);
+  const [feeds, setFeeds] = useState<any>([]);
+  const [feedData, setFeedData] = useState<any>([]);
+  const [visibleFeeds, setVisibleFeeds] = useState<any>({});
+  const [allPosts, setAllPosts] = useState<any>([]);
+  const [savedPosts, setSavedPosts] = useState<any>([]);
 
   // Initialize and load feeds
   useEffect(() => {
@@ -182,13 +182,15 @@ export const FeedProvider = ({children}) => {
   const handleSavePost = async (postId: any) => {
     const db = await getDBConnection();
     await savePost(db, postId);
-    await getSavedPosts(db); // Reload saved posts
+    const updatedSavedPosts = await getSavedPosts(db); // Fetch updated list of saved posts
+    setSavedPosts(updatedSavedPosts); // Update the state with the new list of saved posts
   };
 
   const handleUnsavePost = async (postId: any) => {
     const db = await getDBConnection();
     await unsavePost(db, postId);
-    await getSavedPosts(db); // Reload saved posts
+    const updatedSavedPosts = await getSavedPosts(db); // Fetch updated list of saved posts
+    setSavedPosts(updatedSavedPosts); // Update the state with the new list of saved posts
   };
 
   return (
