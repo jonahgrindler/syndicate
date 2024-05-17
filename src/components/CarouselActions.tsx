@@ -4,9 +4,11 @@ import {Text, Image, View, StyleSheet, Pressable, Animated} from 'react-native';
 import {RootStackParamList} from '../types/RootStackParamList';
 import {StackNavigationProp} from '@react-navigation/stack';
 import {colors, fonts} from '../styles/theme';
+import {useTheme} from '../styles/theme';
 
 const CarouselActions = ({feedContent, handleLargeImages, largeImages}) => {
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
+  const {primaryColor, secondaryColor} = useTheme();
 
   const goToChannelAllPosts = () => {
     navigation.navigate('ChannelAllPosts', {feedContent});
@@ -42,13 +44,23 @@ const CarouselActions = ({feedContent, handleLargeImages, largeImages}) => {
             onPress={handleLargeImages}>
             {largeImages ? (
               <>
-                <Image source={require('../../assets/icons/expand.png')} />
-                <Text style={styles.buttonText}>Large Images</Text>
+                <Image
+                  source={require('../../assets/icons/expand.png')}
+                  style={{tintColor: primaryColor}}
+                />
+                <Text style={[styles.buttonText, {color: primaryColor}]}>
+                  Large Images
+                </Text>
               </>
             ) : (
               <>
-                <Image source={require('../../assets/icons/shrink.png')} />
-                <Text style={styles.buttonText}>Small Images</Text>
+                <Image
+                  source={require('../../assets/icons/shrink.png')}
+                  style={{tintColor: primaryColor}}
+                />
+                <Text style={[styles.buttonText, {color: primaryColor}]}>
+                  Small Images
+                </Text>
               </>
             )}
           </Pressable>
@@ -60,8 +72,13 @@ const CarouselActions = ({feedContent, handleLargeImages, largeImages}) => {
             onPressIn={onPressIn}
             onPressOut={onPressOut}
             onPress={goToChannelAllPosts}>
-            <Image source={require('../../assets/icons/view-all.png')} />
-            <Text style={styles.buttonText}>View All</Text>
+            <Image
+              source={require('../../assets/icons/view-all.png')}
+              style={{tintColor: primaryColor}}
+            />
+            <Text style={[styles.buttonText, {color: primaryColor}]}>
+              View All
+            </Text>
           </Pressable>
         </Animated.View>
       </View>

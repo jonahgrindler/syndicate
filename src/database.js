@@ -235,7 +235,7 @@ export const insertPost = async (
         imageUrl,
         uniqueId,
       ]);
-      console.log('imageUrl:', imageUrl);
+      // console.log('imageUrl:', imageUrl);
       // console.log(
       //   `Inserted ${insertResults[0].rowsAffected} post(s) with unique ID: ${uniqueId} for channel: ${channel_id}`,
       // );
@@ -323,9 +323,13 @@ export const getFeeds = async db => {
   }
 };
 
-export const deleteFeed = async (db, id) => {
-  const deleteQuery = `DELETE FROM feeds WHERE id = ?;`;
-  await db.executeSql(deleteQuery, [id]);
+export const deleteFeed = async (db, feedId) => {
+  try {
+    await db.executeSql('DELETE FROM feeds WHERE id = ?', [feedId]);
+    console.log('Feed deleted successfully');
+  } catch (error) {
+    console.error('Failed to delete feed:', error);
+  }
 };
 
 // Dev Helpers

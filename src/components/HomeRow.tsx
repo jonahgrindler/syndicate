@@ -1,17 +1,23 @@
 import React from 'react';
 import {Image, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import {colors} from '../styles/theme';
+import {useTheme} from '../styles/theme';
 
 const HomeRow: React.FC = ({image, title}) => {
+  const {primaryColor, secondaryColor} = useTheme();
+
   return (
     <View style={styles.titleRow}>
       <View style={styles.imgTitle}>
-        <Image source={image} style={styles.favicon} />
-        <Text style={styles.title}>{title}</Text>
+        <Image
+          source={image}
+          style={[styles.favicon, {tintColor: primaryColor}]}
+        />
+        <Text style={[styles.title, , {color: primaryColor}]}>{title}</Text>
       </View>
       <Image
         source={require('../../assets/icons/chevron.png')}
-        style={[styles.chevron]}
+        style={[styles.chevron, {tintColor: primaryColor}]}
       />
     </View>
   );

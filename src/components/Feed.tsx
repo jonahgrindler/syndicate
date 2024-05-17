@@ -13,10 +13,13 @@ import {FeedProps, FeedItem} from '../types/FeedTypes';
 import {RootStackParamList} from '../types/RootStackParamList';
 import CarouselActions from './CarouselActions';
 import {colors, fonts, images, spacing} from '../styles/theme';
+import formatDate from '../utilities/formatDate';
+import {useTheme} from '../styles/theme';
 
 const Feed: React.FC<FeedProps> = ({feedContent}) => {
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList, 'Feed'>>();
+  const {primaryColor, secondaryColor} = useTheme();
   const [largeImages, setLargeImages] = useState(true);
 
   const handleNavigation = (item: FeedItem) => {
@@ -59,12 +62,17 @@ const Feed: React.FC<FeedProps> = ({feedContent}) => {
                 style={[
                   styles.postImage,
                   largeImages ? styles.smallImage : styles.largeImage,
+                  {tintColor: primaryColor},
                 ]}
               />
             )}
 
-            <Text style={styles.title}>{item.title}</Text>
-            <Text style={styles.subtext}>{item.published}</Text>
+            <Text style={[styles.title, {color: primaryColor}]}>
+              {item.title}
+            </Text>
+            <Text style={[styles.subtext, {color: primaryColor}]}>
+              {formatDate(item.published)}
+            </Text>
           </TouchableOpacity>
         )}
       />
@@ -118,6 +126,7 @@ const styles = StyleSheet.create({
   subtext: {
     fontSize: fonts.size.small,
     color: colors.dark.secondaryText,
+    opacity: 0.6,
     marginTop: 4,
   },
 });

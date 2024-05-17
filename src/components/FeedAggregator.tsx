@@ -13,88 +13,85 @@ import {colors, spacing} from '../styles/theme';
 import {useFeed} from '../context/FeedContext';
 import HomeRow from './HomeRow';
 import ResetDatabase from './ResetDatabase';
+import ThemePicker from './ThemePicker';
+import {useTheme} from '../styles/theme';
+import ChannelMenu from './ChannelMenu';
 
 const FeedAggregator: React.FC = () => {
-  const {feedData, visibleFeeds, toggleFeedVisibility, allPosts, savedPosts} =
-    useFeed();
+  const {
+    feedData,
+    visibleFeeds,
+    toggleFeedVisibility,
+    allPosts,
+    savedPosts,
+    handleDelete,
+  } = useFeed();
   const [showSaved, setShowSaved] = useState(false);
   const [showEverything, setShowEverything] = useState(false);
   const [showSettings, setShowSettings] = useState(true);
+  const [showThemePicker, setShowThemePicker] = useState(false);
+  const [showDataReset, setShowDataReset] = useState(false);
+  const {primaryColor, secondaryColor} = useTheme();
 
   return (
-    <SafeAreaView edges={['top']} style={styles.safeAreaView}>
+    <SafeAreaView
+      edges={['top']}
+      style={[styles.safeAreaView, {backgroundColor: secondaryColor}]}>
       <ScrollView
-        style={styles.scrollView}
+        style={[styles.scrollView, {backgroundColor: secondaryColor}]}
         contentInset={{top: spacing.rowDouble, bottom: spacing.rowDouble}}>
-        <TouchableOpacity
-          onPress={() => setShowEverything(toggle => !toggle)}
-          style={styles.titleRow}>
-          <View style={styles.imgTitle}>
-            <Image
-              source={require('../../assets/icons/everything.png')}
-              style={styles.favicon}
-            />
-            <Text style={styles.title}>Everything</Text>
-          </View>
-          <Image
-            source={require('../../assets/icons/chevron.png')}
-            style={[styles.chevron]}
+        <TouchableOpacity onPress={() => setShowEverything(toggle => !toggle)}>
+          <HomeRow
+            title={'Everything'}
+            image={require('../../assets/icons/everything.png')}
           />
         </TouchableOpacity>
         <>{showEverything && <Feed feedContent={allPosts} />}</>
-        <TouchableOpacity
-          onPress={() => setShowSaved(toggle => !toggle)}
-          style={styles.titleRow}>
-          <View style={styles.imgTitle}>
-            <Image
-              source={
-                showSaved
-                  ? require('../../assets/icons/save-fill.png')
-                  : require('../../assets/icons/save.png')
-              }
-              style={styles.favicon}
-            />
-            <Text style={styles.title}>Saved</Text>
-          </View>
-          <Image
-            source={require('../../assets/icons/chevron.png')}
-            style={[styles.chevron]}
+        <TouchableOpacity onPress={() => setShowSaved(toggle => !toggle)}>
+          <HomeRow
+            title={'Saved'}
+            image={require('../../assets/icons/save.png')}
           />
         </TouchableOpacity>
         <>{showSaved && <Feed feedContent={savedPosts} />}</>
         <View style={styles.emptyRow} />
         {feedData.map(feed => (
           <View key={feed.id} style={styles.channel}>
-            <TouchableOpacity
-              onPress={() => toggleFeedVisibility(feed.id)}
-              style={styles.titleRow}>
-              <View style={styles.imgTitle}>
-                {feed.image ? (
-                  <Image source={{uri: feed.image}} style={styles.favicon} />
-                ) : (
-                  <View
-                    style={[
-                      styles.favicon,
-                      {backgroundColor: feed.color || '#FF00FF'},
-                    ]}
-                  />
-                )}
-                <Text style={styles.title} numberOfLines={1}>
-                  {feed.title || 'No Title Available'}
-                </Text>
-              </View>
-              <Image
-                source={require('../../assets/icons/chevron.png')}
-                style={[
-                  styles.chevron,
-                  {
-                    transform: [
-                      {rotate: visibleFeeds[feed.id] ? '180deg' : '0deg'},
-                    ],
-                  },
-                ]}
-              />
-            </TouchableOpacity>
+            <ChannelMenu onDelete={handleDelete} feedId={feed.id}>
+              <TouchableOpacity
+                onPress={() => toggleFeedVisibility(feed.id)}
+                style={styles.titleRow}>
+                <View style={styles.imgTitle}>
+                  {feed.image ? (
+                    <Image source={{uri: feed.image}} style={styles.favicon} />
+                  ) : (
+                    <View
+                      style={[
+                        styles.favicon,
+                        {backgroundColor: feed.color || '#FF00FF'},
+                      ]}
+                    />
+                  )}
+                  <Text
+                    style={[styles.title, {color: primaryColor}]}
+                    numberOfLines={1}>
+                    {feed.title || 'No Title Available'}
+                  </Text>
+                </View>
+                <Image
+                  source={require('../../assets/icons/chevron.png')}
+                  style={[
+                    styles.chevron,
+                    {
+                      transform: [
+                        {rotate: visibleFeeds[feed.id] ? '180deg' : '0deg'},
+                      ],
+                      tintColor: primaryColor,
+                    },
+                  ]}
+                />
+              </TouchableOpacity>
+            </ChannelMenu>
             <>{visibleFeeds[feed.id] && <Feed feedContent={feed.posts} />}</>
           </View>
         ))}
@@ -105,7 +102,28 @@ const FeedAggregator: React.FC = () => {
             image={require('../../assets/icons/ellipsis.png')}
           />
         </TouchableOpacity>
-        <>{showSettings && <ResetDatabase />}</>
+        <>
+          {showSettings && (
+            <>
+              <TouchableOpacity
+                onPress={() => setShowThemePicker(toggle => !toggle)}>
+                <HomeRow
+                  title={'Color Theme'}
+                  image={require('../../assets/icons/ellipsis.png')}
+                />
+              </TouchableOpacity>
+              {showThemePicker && <ThemePicker />}
+              <TouchableOpacity
+                onPress={() => setShowDataReset(toggle => !toggle)}>
+                <HomeRow
+                  title={'Data'}
+                  image={require('../../assets/icons/ellipsis.png')}
+                />
+              </TouchableOpacity>
+              {showDataReset && <ResetDatabase />}
+            </>
+          )}
+        </>
       </ScrollView>
     </SafeAreaView>
   );
@@ -125,8 +143,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     height: 44,
-    marginLeft: 16,
-    marginRight: 16,
+    flex: 0,
+    paddingLeft: 16,
+    paddingRight: 16,
   },
   imgTitle: {
     flexDirection: 'row',
@@ -143,7 +162,9 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     color: colors.dark.primary,
-    flex: 1,
+    flexShrink: 1,
+    flexGrow: 0,
+    width: '85%',
   },
   chevron: {
     width: 16,

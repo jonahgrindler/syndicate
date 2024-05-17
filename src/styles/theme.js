@@ -1,3 +1,30 @@
+import React, {createContext, useContext, useState} from 'react';
+
+const ThemeContext = createContext({
+  primaryColor: '#007bff', // Default primary color
+  secondaryColor: '#6c757d', // Default secondary color
+  setTheme: () => {}, // Placeholder for function to update theme
+});
+
+export const ThemeProvider = ({children}) => {
+  const [theme, setTheme] = useState({
+    primaryColor: '#007bff',
+    secondaryColor: '#6c757d',
+  });
+
+  const handleSetTheme = (primaryColor, secondaryColor) => {
+    setTheme({primaryColor, secondaryColor});
+  };
+
+  return (
+    <ThemeContext.Provider value={{...theme, setTheme: handleSetTheme}}>
+      {children}
+    </ThemeContext.Provider>
+  );
+};
+
+export const useTheme = () => useContext(ThemeContext);
+
 export const colors = {
   primary: '#3A4048',
   slate: '#3A4048',

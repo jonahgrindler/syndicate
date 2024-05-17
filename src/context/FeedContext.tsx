@@ -12,6 +12,7 @@ import {
   savePost,
   unsavePost,
   parseFeed,
+  deleteFeed,
 } from '../database';
 import * as rssParser from 'react-native-rss-parser';
 import {Post} from '../types/FeedTypes';
@@ -30,6 +31,7 @@ const FeedContext = createContext({
   handleSavePost: () => {},
   handleUnsavePost: () => {},
   getSavedPosts: () => {},
+  handleDelete: () => {},
 });
 
 export const FeedProvider = ({children}) => {
@@ -65,7 +67,7 @@ export const FeedProvider = ({children}) => {
 
       const posts = [];
       for (const item of parsed.items) {
-        console.log('item.imageUrl:', item.imageUrl);
+        // console.log('item.imageUrl:', item.imageUrl);
         const uniqueId = item.id || `${feed.channel_url}-${item.title}`;
         const link = item.links[0].url;
         await insertPost(
@@ -193,6 +195,12 @@ export const FeedProvider = ({children}) => {
     setSavedPosts(updatedSavedPosts); // Update the state with the new list of saved posts
   };
 
+  const handleDelete = async (feedId: any) => {
+    const db = await getDBConnection();
+    await deleteFeed(db, feedId);
+    await refreshFeeds();
+  };
+
   return (
     <FeedContext.Provider
       value={{
@@ -207,6 +215,7 @@ export const FeedProvider = ({children}) => {
         savedPosts,
         handleSavePost,
         handleUnsavePost,
+        handleDelete,
       }}>
       {children}
     </FeedContext.Provider>

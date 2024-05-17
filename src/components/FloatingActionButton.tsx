@@ -5,9 +5,11 @@ import {StackNavigationProp} from '@react-navigation/stack';
 import {useNavigation} from '@react-navigation/native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {colors, fonts, images, spacing} from '../styles/theme';
+import {useTheme} from '../styles/theme';
 
 const FloatingActionButton = () => {
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
+  const {primaryColor, secondaryColor} = useTheme();
   const goToAddFeed = () => {
     navigation.navigate('AddFeed');
   };
@@ -17,8 +19,11 @@ const FloatingActionButton = () => {
         onPress={() => {
           goToAddFeed();
         }}
-        style={styles.button}>
-        <Image source={require('../../assets/icons/plus.png')} />
+        style={[styles.button, {backgroundColor: primaryColor}]}>
+        <Image
+          source={require('../../assets/icons/plus.png')}
+          style={{tintColor: secondaryColor}}
+        />
       </TouchableOpacity>
     </SafeAreaView>
   );

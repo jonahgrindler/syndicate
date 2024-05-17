@@ -1,5 +1,5 @@
 import React from 'react';
-import {Button, View} from 'react-native';
+import {Button, StyleSheet, View, Text} from 'react-native';
 import {
   getDBConnection,
   createTables,
@@ -7,8 +7,11 @@ import {
   getFeeds,
   resetDatabaseTables,
 } from '../database';
+import {fonts, spacing, useTheme} from '../styles/theme';
+import {TouchableOpacity} from 'react-native-gesture-handler';
 
 const ResetDatabase = () => {
+  const {primaryColor, secondaryColor} = useTheme();
   const handleReset = async () => {
     const db = await getDBConnection();
     await resetDatabaseTables(db);
@@ -17,10 +20,31 @@ const ResetDatabase = () => {
   };
 
   return (
-    <View>
-      <Button title="Reset Database" onPress={handleReset} />
-    </View>
+    <TouchableOpacity
+      title="Reset Database"
+      onPress={handleReset}
+      style={[
+        styles.button,
+        {color: secondaryColor, backgroundColor: primaryColor},
+      ]}>
+      <Text style={styles.buttonText}>Reset Database</Text>
+    </TouchableOpacity>
   );
 };
+
+const styles = StyleSheet.create({
+  button: {
+    flex: 1,
+    height: spacing.row,
+    alignItems: 'center',
+    justifyContent: 'center',
+    margin: spacing.leftRightMargin,
+    borderRadius: 40,
+  },
+  buttonText: {
+    fontSize: fonts.size.medium,
+    fontWeight: fonts.weight.bold,
+  },
+});
 
 export default ResetDatabase;
