@@ -28,7 +28,8 @@ export const createTables = async db => {
       channel_url TEXT UNIQUE,
       title TEXT,
       image TEXT,
-      image_size BOOLEAN DEFAULT 0
+      image_size BOOLEAN DEFAULT 0,
+      unseen_count INTEGER DEFAULT 0
     );
   `;
   const queryPosts = `
@@ -42,6 +43,7 @@ export const createTables = async db => {
       imageUrl TEXT, 
       post_unique_id TEXT UNIQUE,
       is_saved BOOLEAN DEFAULT 0,
+      is_viewed BOOLEAN DEFAULT 0,
       FOREIGN KEY (channel_id) REFERENCES Channels (channel_id)
     );
   `;
@@ -204,6 +206,7 @@ export const insertPost = async (
   published,
   imageUrl,
   uniqueId,
+  feedId,
 ) => {
   try {
     // First, get the channel ID from the feeds table based on the channel URL
@@ -223,8 +226,9 @@ export const insertPost = async (
           description, 
           published, 
           imageUrl, 
-          post_unique_id
-        ) VALUES (?, ?, ?, ?, ?, ?, ?);
+          post_unique_id,
+          is_viewed
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, 0);
       `;
       await db.executeSql(insertQuery, [
         channel_id,
@@ -235,15 +239,14 @@ export const insertPost = async (
         imageUrl,
         uniqueId,
       ]);
-      // console.log('imageUrl:', imageUrl);
-      // console.log(
-      //   `Inserted ${insertResults[0].rowsAffected} post(s) with unique ID: ${uniqueId} for channel: ${channel_id}`,
-      // );
+      const updateFeedQuery =
+        'UPDATE feeds SET unseen_count = unseen_count + 1 WHERE id = ?';
+      await db.executeSql(updateFeedQuery, [feedId]);
     } else {
       console.error('No channel found with URL:', channelUrl);
     }
   } catch (error) {
-    console.error('Failed to add post:', error);
+    console.error('Failed to add post or update unseen count:', error);
     throw error;
   }
 };
@@ -259,6 +262,7 @@ export const insertPosts = async (db, channelUrl, posts) => {
       post.published,
       post.imageUrl,
       post.uniqueId,
+      post.isViewed,
     );
     // console.log(post);
   }
@@ -288,6 +292,30 @@ export const getSavedPosts = async db => {
     posts.push(results[0].rows.item(i));
   }
   return posts;
+};
+
+export const countNewPosts = async (db, feedId) => {
+  const results = await db.executeSql(
+    'SELECT COUNT(*) AS newPostsCount FROM posts WHERE channel_id = ? AND is_viewed = 0',
+    [feedId],
+  );
+  return results[0].rows.item(0).newPostsCount;
+};
+
+export const viewFeed = async (db, feedId) => {
+  try {
+    await db.executeSql('UPDATE posts SET is_viewed = 1 WHERE channel_id = ?', [
+      feedId,
+    ]);
+    await db.executeSql('UPDATE feeds SET unseen_count = 0 WHERE id = ?', [
+      feedId,
+    ]);
+  } catch (error) {
+    console.error(
+      'Failed to mark posts as viewed or reset unseen count:',
+      error,
+    );
+  }
 };
 
 export const fetchPostsForFeed = async (db, feedId) => {

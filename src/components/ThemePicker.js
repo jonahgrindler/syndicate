@@ -15,8 +15,8 @@ import ColorPicker from 'react-native-wheel-color-picker';
 
 const ThemePicker = () => {
   const {setTheme} = useTheme();
-  const [primaryColor, setPrimaryColor] = useState('#ffffff');
-  const [secondaryColor, setSecondaryColor] = useState('#000000');
+  const [primaryColor, setPrimaryColor] = useState('#000000');
+  const [secondaryColor, setSecondaryColor] = useState('#ffffff');
 
   const handleSubmit = () => {
     setTheme(primaryColor, secondaryColor);
@@ -51,6 +51,7 @@ const ThemePicker = () => {
             onChangeText={setPrimaryColor}
             placeholder="#ffffff"
           />
+
           <ColorPicker
             ref={r => {
               this.picker = r;
@@ -65,9 +66,9 @@ const ThemePicker = () => {
             shadeSliderThumb={false}
             noSnap={false}
             row={false}
-            swatches={false}
             useNativeDriver={true}
             useNativeLayout={true}
+            swatches={false}
           />
         </View>
         <View style={styles.inputContainer}>

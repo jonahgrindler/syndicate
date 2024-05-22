@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import Feed from './Feed';
-import {colors, spacing} from '../styles/theme';
+import {colors, fonts, spacing} from '../styles/theme';
 import {useFeed} from '../context/FeedContext';
 import HomeRow from './HomeRow';
 import ResetDatabase from './ResetDatabase';
@@ -22,6 +22,7 @@ const FeedAggregator: React.FC = () => {
     feedData,
     visibleFeeds,
     toggleFeedVisibility,
+    handleOpenFeed,
     allPosts,
     savedPosts,
     handleDelete,
@@ -57,9 +58,12 @@ const FeedAggregator: React.FC = () => {
         <View style={styles.emptyRow} />
         {feedData.map(feed => (
           <View key={feed.id} style={styles.channel}>
-            <ChannelMenu onDelete={handleDelete} feedId={feed.id}>
+            <ChannelMenu
+              onDelete={handleDelete}
+              feedId={feed.id}
+              feedTitle={feed.title}>
               <TouchableOpacity
-                onPress={() => toggleFeedVisibility(feed.id)}
+                onPress={() => handleOpenFeed(feed.id)}
                 style={styles.titleRow}>
                 <View style={styles.imgTitle}>
                   {feed.image ? (
@@ -78,18 +82,34 @@ const FeedAggregator: React.FC = () => {
                     {feed.title || 'No Title Available'}
                   </Text>
                 </View>
-                <Image
-                  source={require('../../assets/icons/chevron.png')}
-                  style={[
-                    styles.chevron,
-                    {
-                      transform: [
-                        {rotate: visibleFeeds[feed.id] ? '180deg' : '0deg'},
-                      ],
-                      tintColor: primaryColor,
-                    },
-                  ]}
-                />
+                <View style={styles.titleRowRight}>
+                  {feed.unseenCount > 0 && (
+                    <View style={styles.unseenCount}>
+                      <View
+                        style={[
+                          styles.unseenCountBG,
+                          {backgroundColor: primaryColor},
+                        ]}
+                      />
+                      <Text
+                        style={[styles.unseenCountText, {color: primaryColor}]}>
+                        {feed.unseenCount} New
+                      </Text>
+                    </View>
+                  )}
+                  <Image
+                    source={require('../../assets/icons/chevron.png')}
+                    style={[
+                      styles.chevron,
+                      {
+                        transform: [
+                          {rotate: visibleFeeds[feed.id] ? '180deg' : '0deg'},
+                        ],
+                        tintColor: primaryColor,
+                      },
+                    ]}
+                  />
+                </View>
               </TouchableOpacity>
             </ChannelMenu>
             <>{visibleFeeds[feed.id] && <Feed feedContent={feed.posts} />}</>
@@ -164,7 +184,35 @@ const styles = StyleSheet.create({
     color: colors.dark.primary,
     flexShrink: 1,
     flexGrow: 0,
-    width: '85%',
+    // width: '85%',
+  },
+  titleRowRight: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 16,
+  },
+  unseenCount: {
+    // backgroundColor: 'red',
+    height: 22,
+    borderRadius: 3,
+    alignItems: 'center',
+    justifyContent: 'center',
+    // paddingHorizontal: 5,
+  },
+  unseenCountBG: {
+    opacity: 0.08,
+    height: 22,
+    width: '100%',
+    flex: 1,
+    position: 'absolute',
+    borderRadius: 3,
+    paddingHorizontal: 10,
+  },
+  unseenCountText: {
+    paddingHorizontal: 5,
+    fontSize: fonts.size.small,
+    fontWeight: 600,
   },
   chevron: {
     width: 16,

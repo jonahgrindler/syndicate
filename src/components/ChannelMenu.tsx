@@ -10,7 +10,7 @@ import {
   Platform,
 } from 'react-native';
 
-const ChannelMenu = ({children, onDelete, feedId}) => {
+const ChannelMenu = ({children, onDelete, feedId, feedTitle}) => {
   const handlePress = ({nativeEvent}) => {
     if (nativeEvent.event === 'destructive') {
       onDelete(feedId);
@@ -18,12 +18,23 @@ const ChannelMenu = ({children, onDelete, feedId}) => {
   };
   return (
     <MenuView
-      title="Menu Title"
+      title={feedTitle}
       onPressAction={handlePress}
       actions={[
         {
+          id: 'rename',
+          title: 'Rename Feed',
+          attributes: {
+            destructive: false,
+          },
+          image: Platform.select({
+            ios: 'pencil',
+            android: 'ic_menu_edit',
+          }),
+        },
+        {
           id: 'destructive',
-          title: 'Remove Feed',
+          title: 'Delete Feed',
           attributes: {
             destructive: true,
           },

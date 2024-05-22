@@ -11,8 +11,10 @@ import {
   getSavedPosts,
   savePost,
   unsavePost,
+  countNewPosts,
   parseFeed,
   deleteFeed,
+  viewFeed,
 } from '../database';
 import * as rssParser from 'react-native-rss-parser';
 import {Post} from '../types/FeedTypes';
@@ -22,6 +24,7 @@ const FeedContext = createContext({
   feedData: [],
   visibleFeeds: {},
   toggleFeedVisibility: () => {},
+  handleOpenFeed: () => {},
   refreshFeeds: () => {},
   addNewFeed: () => {},
   fetchAndStoreFeeds: () => {},
@@ -31,6 +34,7 @@ const FeedContext = createContext({
   handleSavePost: () => {},
   handleUnsavePost: () => {},
   getSavedPosts: () => {},
+  countNewPosts: () => {},
   handleDelete: () => {},
 });
 
@@ -89,11 +93,14 @@ export const FeedProvider = ({children}) => {
           post_unique_id: uniqueId,
         });
       }
+      const unseenCount = await countNewPosts(db, feed.id);
+
       feedsWithPosts.push({
         ...feed,
         title: parsed.title,
         posts: posts,
         image: parsed.image?.url,
+        unseenCount: unseenCount,
       });
     }
 
@@ -110,6 +117,12 @@ export const FeedProvider = ({children}) => {
 
   const toggleFeedVisibility = id => {
     setVisibleFeeds(prev => ({...prev, [id]: !prev[id]}));
+  };
+
+  const handleOpenFeed = async (feedId: any) => {
+    setVisibleFeeds(prev => ({...prev, [feedId]: !prev[feedId]}));
+    const db = await getDBConnection();
+    await viewFeed(db, feedId);
   };
 
   // Add
@@ -215,6 +228,7 @@ export const FeedProvider = ({children}) => {
         savedPosts,
         handleSavePost,
         handleUnsavePost,
+        handleOpenFeed,
         handleDelete,
       }}>
       {children}

@@ -10,7 +10,7 @@ import {WebView} from 'react-native-webview';
 import {useNavigation, RouteProp} from '@react-navigation/native';
 import {RootStackParamList} from '../types/RootStackParamList';
 import {StackNavigationProp} from '@react-navigation/stack';
-import {colors} from '../styles/theme';
+import {colors, spacing} from '../styles/theme';
 import {useFeed} from '../context/FeedContext';
 
 type WebViewProps = {
@@ -55,14 +55,14 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
   },
   bottomBar: {
-    height: 72,
+    height: 56,
     width: '100%',
     backgroundColor: 'white',
     bottom: 0,
     flexDirection: 'row',
-    paddingLeft: 16,
-    paddingRight: 16,
-    paddingTop: 20,
+    paddingLeft: spacing.leftRightMargin,
+    paddingRight: spacing.leftRightMargin,
+    paddingTop: spacing.leftRightMargin,
 
     justifyContent: 'space-between',
   },

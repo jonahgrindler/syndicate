@@ -8,8 +8,8 @@ const ThemeContext = createContext({
 
 export const ThemeProvider = ({children}) => {
   const [theme, setTheme] = useState({
-    primaryColor: '#007bff',
-    secondaryColor: '#6c757d',
+    primaryColor: '#ffffff',
+    secondaryColor: '#000000',
   });
 
   const handleSetTheme = (primaryColor, secondaryColor) => {
@@ -54,8 +54,8 @@ export const fonts = {
     large: 20,
   },
   weight: {
-    regular: '400',
-    bold: '600',
+    regular: 400,
+    bold: 600,
   },
 };
 
