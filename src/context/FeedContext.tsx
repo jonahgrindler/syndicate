@@ -22,6 +22,7 @@ import {Post} from '../types/FeedTypes';
 const FeedContext = createContext({
   feeds: [],
   feedData: [],
+  selectedFeedId: [],
   visibleFeeds: {},
   toggleFeedVisibility: () => {},
   handleOpenFeed: () => {},
@@ -36,14 +37,18 @@ const FeedContext = createContext({
   getSavedPosts: () => {},
   countNewPosts: () => {},
   handleDelete: () => {},
+  showSettings: {},
 });
 
 export const FeedProvider = ({children}) => {
   const [feeds, setFeeds] = useState<any>([]);
   const [feedData, setFeedData] = useState<any>([]);
+  const [selectedFeedId, setSelectedFeedId] = useState<any>([]);
   const [visibleFeeds, setVisibleFeeds] = useState<any>({});
   const [allPosts, setAllPosts] = useState<any>([]);
   const [savedPosts, setSavedPosts] = useState<any>([]);
+  const [posts, setPosts] = useState([]);
+  const [showSettings, setShowSettings] = useState(false);
 
   // Initialize and load feeds
   useEffect(() => {
@@ -162,6 +167,39 @@ export const FeedProvider = ({children}) => {
   //   setFeeds(updatedFeeds);
   // };
 
+  const handleSelectedFeedId = id => {
+    setSelectedFeedId(id);
+    // console.log('Select nav item:', selectedFeedId);
+  };
+
+  useEffect(() => {
+    const loadPosts = async () => {
+      if (selectedFeedId === 'saved') {
+        console.log('Nav: saved');
+        setShowSettings(false);
+        // const savedPosts = await fetchSavedPosts(db);
+        const db = await getDBConnection();
+        const savedPostsList = await getSavedPosts(db);
+        setSavedPosts(savedPostsList);
+        setPosts(savedPosts);
+      } else if (selectedFeedId === 'settings') {
+        console.log('Nav: settings');
+        setPosts([]);
+        setShowSettings(true);
+      } else if (selectedFeedId) {
+        setShowSettings(false);
+        const db = await getDBConnection();
+        const loadedPosts = await fetchPostsForFeed(db, selectedFeedId);
+        setPosts(loadedPosts);
+      } else {
+        setShowSettings(false);
+        setPosts([]);
+      }
+    };
+
+    loadPosts();
+  }, [selectedFeedId]);
+
   const loadAllPosts = async () => {
     const db = await getDBConnection();
     const feeds = await getFeeds(db);
@@ -219,6 +257,9 @@ export const FeedProvider = ({children}) => {
       value={{
         feeds,
         feedData,
+        selectedFeedId,
+        handleSelectedFeedId,
+        posts,
         visibleFeeds,
         toggleFeedVisibility,
         addNewFeed,
@@ -230,6 +271,7 @@ export const FeedProvider = ({children}) => {
         handleUnsavePost,
         handleOpenFeed,
         handleDelete,
+        showSettings,
       }}>
       {children}
     </FeedContext.Provider>

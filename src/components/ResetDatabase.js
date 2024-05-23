@@ -23,11 +23,10 @@ const ResetDatabase = () => {
     <TouchableOpacity
       title="Reset Database"
       onPress={handleReset}
-      style={[
-        styles.button,
-        {color: secondaryColor, backgroundColor: primaryColor},
-      ]}>
-      <Text style={styles.buttonText}>Reset Database</Text>
+      style={[styles.button, {borderColor: primaryColor}]}>
+      <Text style={[styles.buttonText, {color: primaryColor}]}>
+        Reset Database
+      </Text>
     </TouchableOpacity>
   );
 };
@@ -38,8 +37,9 @@ const styles = StyleSheet.create({
     height: spacing.row,
     alignItems: 'center',
     justifyContent: 'center',
-    margin: spacing.leftRightMargin,
-    borderRadius: 40,
+    // margin: spacing.leftRightMargin,
+    borderRadius: 24,
+    borderWidth: 2,
   },
   buttonText: {
     fontSize: fonts.size.medium,

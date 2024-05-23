@@ -33,15 +33,24 @@ const FeedWebView: React.FC<WebViewProps> = ({route}) => {
       <WebView useWebKit={true} source={{uri: url}} style={styles.webView} />
       <View style={styles.bottomBar}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Image source={require('../../assets/icons/chevron-left.png')} />
+          <Image
+            source={require('../../assets/icons/chevron-left.png')}
+            tintColor={colors.primary}
+          />
         </TouchableOpacity>
         {isSaved ? (
           <TouchableOpacity onPress={() => handleUnsavePost(postId)}>
-            <Image source={require('../../assets/icons/save-fill.png')} />
+            <Image
+              source={require('../../assets/icons/save-fill.png')}
+              tintColor={colors.primary}
+            />
           </TouchableOpacity>
         ) : (
           <TouchableOpacity onPress={() => handleSavePost(postId)}>
-            <Image source={require('../../assets/icons/save.png')} />
+            <Image
+              source={require('../../assets/icons/save.png')}
+              tintColor={colors.primary}
+            />
           </TouchableOpacity>
         )}
       </View>
@@ -52,12 +61,12 @@ const FeedWebView: React.FC<WebViewProps> = ({route}) => {
 const styles = StyleSheet.create({
   webView: {
     flex: 1, // Ensures that the WebView takes up the full space of its container
-    backgroundColor: colors.background,
+    backgroundColor: colors.secondary,
   },
   bottomBar: {
     height: 56,
     width: '100%',
-    backgroundColor: 'white',
+    backgroundColor: colors.secondary,
     bottom: 0,
     flexDirection: 'row',
     paddingLeft: spacing.leftRightMargin,

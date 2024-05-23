@@ -10,6 +10,7 @@ import ChannelAllPosts from './src/components/ChannelAllPosts';
 import {FeedProvider} from './src/context/FeedContext';
 import {ThemeProvider} from './src/styles/theme';
 import AddFeed from './src/components/AddFeed';
+import SplitHome from './SplitHome';
 
 const Stack = createStackNavigator<RootStackParamList>();
 
@@ -23,7 +24,7 @@ function App(): React.JSX.Element {
             screenOptions={{
               headerShown: false,
             }}>
-            <Stack.Screen name="HomeScreen" component={Home} />
+            <Stack.Screen name="HomeScreen" component={SplitHome} />
             <Stack.Screen name="AddFeed" component={AddFeed} />
             <Stack.Screen
               name="SavedScreen"
