@@ -177,16 +177,20 @@ export const FeedProvider = ({children}) => {
       if (selectedFeedId === 'saved') {
         console.log('Nav: saved');
         setShowSettings(false);
-        // const savedPosts = await fetchSavedPosts(db);
         const db = await getDBConnection();
         const savedPostsList = await getSavedPosts(db);
         setSavedPosts(savedPostsList);
         setPosts(savedPosts);
       } else if (selectedFeedId === 'settings') {
-        console.log('Nav: settings');
+        // Show Settings, hide feed
         setPosts([]);
         setShowSettings(true);
+      } else if (selectedFeedId === 'everything') {
+        // Show all posts
+        setShowSettings(false);
+        setPosts(allPosts);
       } else if (selectedFeedId) {
+        // Show a feed
         setShowSettings(false);
         const db = await getDBConnection();
         const loadedPosts = await fetchPostsForFeed(db, selectedFeedId);

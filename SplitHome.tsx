@@ -1,12 +1,8 @@
 import React from 'react';
-import {View, StyleSheet, Text} from 'react-native';
-import FeedAggregator from './src/components/FeedAggregator';
-import HomeTopNav from './src/components/HomeTopNav';
-import FloatingActionButton from './src/components/FloatingActionButton';
+import {View, StyleSheet} from 'react-native';
 import SideNav from './src/components/SideNav';
 import SideFeed from './src/components/SideFeed';
 import {colors, useTheme} from './src/styles/theme';
-import ResetDatabase from './src/components/ResetDatabase';
 import {useFeed} from './src/context/FeedContext';
 import Settings from './src/components/Settings';
 

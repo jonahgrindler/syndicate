@@ -43,7 +43,7 @@ const NavRow: React.FC<any> = ({title, selected, newCount, feedId}) => {
         style={[
           styles.navText,
           isSelected
-            ? {color: highlightColor, width: 120}
+            ? {color: highlightColor, maxWidth: 120, width: 'auto'}
             : {color: primaryColor},
         ]}
         numberOfLines={1}>
@@ -60,6 +60,7 @@ const styles = StyleSheet.create({
   navRow: {
     flexDirection: 'row',
     alignItems: 'baseline',
+    justifyContent: 'flex-start',
   },
   dot: {
     width: 16,
