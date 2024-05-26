@@ -3,6 +3,7 @@ import {View, Text, Image, StyleSheet, TouchableOpacity} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {colors, fonts, spacing, useTheme} from '../styles/theme';
+import ChannelMenu from './ChannelMenu';
 
 const navButton: React.FC<any> = ({label, buttonHeight, to}) => {
   const navigation =

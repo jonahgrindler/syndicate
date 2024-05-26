@@ -33,6 +33,17 @@ const ChannelMenu = ({children, onDelete, feedId, feedTitle}) => {
           }),
         },
         {
+          id: 'hide',
+          title: 'Exclude in Everything',
+          attributes: {
+            destructive: false,
+          },
+          image: Platform.select({
+            ios: 'minus.circle',
+            android: 'ic_menu_edit',
+          }),
+        },
+        {
           id: 'destructive',
           title: 'Delete Feed',
           attributes: {

@@ -294,12 +294,48 @@ export const getSavedPosts = async db => {
   return posts;
 };
 
+export const postExistsInDB = async (db, uniqueId) => {
+  try {
+    const results = await db.executeSql(
+      'SELECT COUNT(*) AS count FROM posts WHERE post_unique_id = ?',
+      [uniqueId],
+    );
+    return results[0].rows.item(0).count > 0;
+  } catch (error) {
+    console.error('Error checking if post exists in DB:', error);
+    throw error;
+  }
+};
+
 export const countNewPosts = async (db, feedId) => {
   const results = await db.executeSql(
     'SELECT COUNT(*) AS newPostsCount FROM posts WHERE channel_id = ? AND is_viewed = 0',
     [feedId],
   );
   return results[0].rows.item(0).newPostsCount;
+};
+
+export const markPostsAsSeen = async (db, feedId) => {
+  try {
+    await db.executeSql('UPDATE posts SET is_viewed = 1 WHERE channel_id = ?', [
+      feedId,
+    ]);
+  } catch (error) {
+    console.error('Error marking posts as seen:', error);
+    throw error;
+  }
+};
+
+export const updateUnseenCount = async (db, feedId, count) => {
+  try {
+    await db.executeSql('UPDATE feeds SET unseen_count = ? WHERE id = ?', [
+      count,
+      feedId,
+    ]);
+  } catch (error) {
+    console.error('Error updating unseen count:', error);
+    throw error;
+  }
 };
 
 export const viewFeed = async (db, feedId) => {

@@ -48,12 +48,17 @@ const SideFeed: React.FC<FeedProps> = ({feedContent}) => {
     });
   };
 
+  // Sort posts by date
+  const sortedPosts = posts.sort(
+    (a, b) => new Date(b.published) - new Date(a.published),
+  );
+
   return (
     <>
       <FlatList
         ref={flatListRef}
         style={[styles.scrollView, {paddingTop: insets.top + 8}]}
-        data={posts}
+        data={sortedPosts}
         keyExtractor={item => item.post_id.toString()}
         renderItem={({item}) => (
           <MenuPost postId={item.post_id}>
@@ -75,6 +80,9 @@ const SideFeed: React.FC<FeedProps> = ({feedContent}) => {
               ) : null}
               <Text style={[styles.postTitle, {color: primaryColor}]}>
                 {item.title}
+              </Text>
+              <Text style={[styles.smallText, {color: primaryColor}]}>
+                {item.published}
               </Text>
             </TouchableOpacity>
           </MenuPost>
@@ -101,6 +109,12 @@ const styles = StyleSheet.create({
   postTitle: {
     fontSize: 22,
     lineHeight: 26,
+    fontWeight: fonts.weight.semibold,
+    color: colors.primary,
+  },
+  smallText: {
+    fontSize: 10,
+    lineHeight: '1.1rem',
     fontWeight: fonts.weight.semibold,
     color: colors.primary,
   },

@@ -6,6 +6,7 @@ import {
   ScrollView,
   StyleSheet,
   TouchableOpacity,
+  RefreshControl,
 } from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import Feed from './Feed';
@@ -24,21 +25,32 @@ const SideNav: React.FC = ({feedContent}) => {
     feedData,
     visibleFeeds,
     toggleFeedVisibility,
+    refreshFeeds,
     handleOpenFeed,
     allPosts,
     savedPosts,
     handleDelete,
   } = useFeed();
   const {primaryColor, secondaryColor, highlightColor} = useTheme();
+  const [refreshing, setRefreshing] = useState(false);
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await refreshFeeds();
+    setRefreshing(false);
+  };
 
   return (
     <SafeAreaView
       style={[styles.safeAreaView, {backgroundColor: secondaryColor}]}>
-      <View>
+      <ScrollView
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }>
         <NavRow
           title={'Everything'}
           selected={true}
-          newCount={1}
+          newCount={0}
           feedId={'everything'}
         />
         <NavRow
@@ -59,7 +71,7 @@ const SideNav: React.FC = ({feedContent}) => {
             <NavRow
               title={feed.title}
               selected={false}
-              newCount={0}
+              newCount={feed.unseenCount}
               feedId={feed.id}
             />
           </View>
@@ -71,7 +83,7 @@ const SideNav: React.FC = ({feedContent}) => {
           newCount={0}
           feedId={'settings'}
         />
-      </View>
+      </ScrollView>
       <View style={styles.buttons}>
         <NavButton label={'Post'} buttonHeight={106} to={''} />
         <NavButton label={'Add'} buttonHeight={36} to={'AddFeed'} />

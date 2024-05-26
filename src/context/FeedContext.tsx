@@ -8,10 +8,14 @@ import {
   insertPost,
   fetchPostsForFeed,
   insertFeed,
+  insertPosts,
   getSavedPosts,
   savePost,
   unsavePost,
+  postExistsInDB,
   countNewPosts,
+  markPostsAsSeen,
+  updateUnseenCount,
   parseFeed,
   deleteFeed,
   viewFeed,
@@ -26,6 +30,7 @@ const FeedContext = createContext({
   visibleFeeds: {},
   toggleFeedVisibility: () => {},
   handleOpenFeed: () => {},
+  handleSelectedFeedId: () => {},
   refreshFeeds: () => {},
   addNewFeed: () => {},
   fetchAndStoreFeeds: () => {},
@@ -35,7 +40,10 @@ const FeedContext = createContext({
   handleSavePost: () => {},
   handleUnsavePost: () => {},
   getSavedPosts: () => {},
+  postExistsInDB: () => {},
   countNewPosts: () => {},
+  markPostsAsSeen: () => {},
+  updateUnseenCount: () => {},
   handleDelete: () => {},
   showSettings: {},
 });
@@ -75,20 +83,25 @@ export const FeedProvider = ({children}) => {
       // console.log('parsed:', parsed);
 
       const posts = [];
+      let newPostsCount = 0;
       for (const item of parsed.items) {
         // console.log('item.imageUrl:', item.imageUrl);
         const uniqueId = item.id || `${feed.channel_url}-${item.title}`;
         const link = item.links[0].url;
-        await insertPost(
-          db,
-          feed.channel_url,
-          item.title,
-          link,
-          item.description,
-          item.published,
-          item.imageUrl,
-          uniqueId,
-        );
+        const postExists = await postExistsInDB(db, uniqueId);
+        if (!postExists) {
+          await insertPost(
+            db,
+            feed.channel_url,
+            item.title,
+            link,
+            item.description,
+            item.published,
+            item.imageUrl,
+            uniqueId,
+          );
+          // newPostsCount += 1;
+        }
         posts.push({
           title: item.title,
           link: link,
@@ -98,6 +111,9 @@ export const FeedProvider = ({children}) => {
           post_unique_id: uniqueId,
         });
       }
+      // Sort posts by date
+      posts.sort((a, b) => new Date(b.published) - new Date(a.published));
+
       const unseenCount = await countNewPosts(db, feed.id);
 
       feedsWithPosts.push({
@@ -106,6 +122,7 @@ export const FeedProvider = ({children}) => {
         posts: posts,
         image: parsed.image?.url,
         unseenCount: unseenCount,
+        // unseenCount: newPostsCount,
       });
     }
 
@@ -133,43 +150,27 @@ export const FeedProvider = ({children}) => {
   // Add
   const addNewFeed = async (url: string | URL | Request) => {
     const db = await getDBConnection();
-    const response = await fetch(url);
-    const responseData = await response.text();
-    const parsed = await rssParser.parse(responseData);
+    const parsed = await parseFeed(url);
 
     await insertFeed(db, {
       channel_url: url,
       title: parsed.title,
       image: parsed.image.url,
     });
-
-    parsed.items.forEach(async item => {
-      await insertPost(
-        db,
-        url,
-        item.title,
-        item.description,
-        item.published,
-        item.id || `${url}-${item.title}`, // Ensuring uniqueness
-      );
-    });
-
-    await refreshFeeds(); // Optionally refresh the feed list after adding a new feed
+    await insertPosts(db, url, parsed.items);
+    await refreshFeeds();
   };
 
   const refreshFeeds = async () => {
     await fetchAndStoreFeeds();
   };
 
-  // const refreshFeeds = async () => {
-  //   const db = await getDBConnection();
-  //   const updatedFeeds = await getFeeds(db);
-  //   setFeeds(updatedFeeds);
-  // };
-
-  const handleSelectedFeedId = id => {
-    setSelectedFeedId(id);
-    // console.log('Select nav item:', selectedFeedId);
+  const handleSelectedFeedId = async feedId => {
+    setSelectedFeedId(feedId);
+    const db = await getDBConnection();
+    await markPostsAsSeen(db, feedId);
+    await updateUnseenCount(db, feedId, 0);
+    await fetchAndStoreFeeds();
   };
 
   useEffect(() => {
