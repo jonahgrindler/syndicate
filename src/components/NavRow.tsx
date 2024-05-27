@@ -44,12 +44,12 @@ const NavRow: React.FC<any> = ({title, selected, newCount, feedId}) => {
         onPressIn={hapticsPressIn}
         onPress={() => [handleSelectedFeedId(feedId), haptics()]}>
         {isSelected ? (
-          <View style={[styles.dot, {backgroundColor: highlightColor}]} />
+          <View style={[styles.dot, {backgroundColor: primaryColor}]} />
         ) : null}
         <Text
           style={[
             styles.navText,
-            isSelected || newCount > 0
+            newCount > 0
               ? {color: highlightColor, maxWidth: 120, width: 'auto'}
               : {color: primaryColor},
           ]}

@@ -8,6 +8,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   FlatList,
+  ScrollView,
 } from 'react-native';
 import {FeedProps, FeedItem} from '../types/FeedTypes';
 import {RootStackParamList} from '../types/RootStackParamList';
@@ -23,10 +24,20 @@ import {useTheme} from '../styles/theme';
 import Settings from './Settings';
 import MenuPost from './MenuPost';
 
-const SideFeed: React.FC<FeedProps> = ({feedContent}) => {
-  const {feedData, posts, showSettings} = useFeed();
+const SideFeed: React.FC<FeedProps> = () => {
+  const {feedData, feeds, posts, showSettings, selectedFeedId} = useFeed();
   const {primaryColor, secondaryColor} = useTheme();
   const insets = useSafeAreaInsets();
+
+  // // Feed Title + Icon
+  // const selectedFeed = feedData.find(feed => feed.id === selectedFeedId);
+  // useEffect(() => {
+  //   console.log('Selected:', selectedFeedId);
+  //   if (selectedFeed) {
+  //     console.log('Title:', selectedFeed.title);
+  //     console.log('Image:', selectedFeed.image);
+  //   }
+  // }, [selectedFeedId]);
 
   const flatListRef = useRef(null);
   useEffect(() => {
@@ -34,7 +45,6 @@ const SideFeed: React.FC<FeedProps> = ({feedContent}) => {
       flatListRef.current.scrollToOffset({animated: false, offset: 0});
     }
   }, [posts]);
-  // console.log(feedData[0].posts);
 
   const navigation =
     useNavigation<
@@ -55,6 +65,22 @@ const SideFeed: React.FC<FeedProps> = ({feedContent}) => {
 
   return (
     <>
+      {/* <ScrollView style={[styles.scrollView, {paddingTop: insets.top + 8}]}>
+        <View style={styles.feedHeading}>
+          {selectedFeed.image ? (
+            <Image source={{uri: selectedFeed.image}} style={styles.favicon} />
+          ) : (
+            <View
+              style={[styles.favicon, {backgroundColor: primaryColor}]}></View>
+          )}
+          <Text style={[styles.feedTitle, {color: primaryColor}]}>
+            {selectedFeed?.title || 'No Title Available'}
+          </Text>
+          <Image
+            source={require('../../assets/icons/ellipsis.png')}
+            style={[styles.chevron, {tintColor: primaryColor}]}
+          />
+        </View> */}
       <FlatList
         ref={flatListRef}
         style={[styles.scrollView, {paddingTop: insets.top + 8}]}
@@ -89,6 +115,7 @@ const SideFeed: React.FC<FeedProps> = ({feedContent}) => {
         )}
       />
       {showSettings ? <Settings /> : null}
+      {/* </ScrollView> */}
     </>
   );
 };
@@ -97,6 +124,21 @@ const styles = StyleSheet.create({
   scrollView: {
     flex: 1,
     paddingRight: 8,
+  },
+  feedHeading: {
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 4,
+  },
+  favicon: {
+    width: 40,
+    height: 40,
+    borderRadius: 40,
+  },
+  feedTitle: {
+    fontSize: fonts.size.small,
+    textAlign: 'center',
   },
   postContainer: {
     // borderWidth: 2,
@@ -114,16 +156,17 @@ const styles = StyleSheet.create({
   },
   smallText: {
     fontSize: 10,
-    lineHeight: '1.1rem',
+    lineHeight: 12,
     fontWeight: fonts.weight.semibold,
     color: colors.primary,
+    marginTop: 4,
   },
   postImage: {
     width: '100%',
     height: 160,
     marginBottom: 8,
-    borderRadius: 1,
-    borderWidth: 3,
+    // borderRadius: 1,
+    // borderWidth: 3,
     borderStyle: 'dashed',
     borderColor: colors.secondary,
   },

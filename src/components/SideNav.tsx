@@ -45,7 +45,11 @@ const SideNav: React.FC = ({feedContent}) => {
       style={[styles.safeAreaView, {backgroundColor: secondaryColor}]}>
       <ScrollView
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor={primaryColor}
+          />
         }>
         <NavRow
           title={'Everything'}
@@ -58,12 +62,6 @@ const SideNav: React.FC = ({feedContent}) => {
           selected={false}
           newCount={0}
           feedId={'saved'}
-        />
-        <NavRow
-          title={'My Posts'}
-          selected={false}
-          newCount={0}
-          feedId={'myPosts'}
         />
 
         {feedData.map(feed => (
@@ -85,8 +83,9 @@ const SideNav: React.FC = ({feedContent}) => {
         />
       </ScrollView>
       <View style={styles.buttons}>
-        <NavButton label={'Post'} buttonHeight={106} to={''} />
-        <NavButton label={'Add'} buttonHeight={36} to={'AddFeed'} />
+        {/* <NavButton label={'Post'} buttonHeight={106} to={''} /> */}
+        <NavButton label={'Add'} buttonHeight={106} to={'AddFeed'} />
+        <NavButton label={'Folder'} buttonHeight={36} to={'AddFeed'} />
       </View>
     </SafeAreaView>
   );
