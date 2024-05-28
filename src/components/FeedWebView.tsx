@@ -30,7 +30,15 @@ const FeedWebView: React.FC<WebViewProps> = ({route}) => {
 
   return (
     <SafeAreaView style={styles.webView}>
-      <WebView useWebKit={true} source={{uri: url}} style={styles.webView} />
+      <WebView
+        useWebKit={true}
+        source={{uri: url}}
+        style={styles.webView}
+        mediaPlaybackRequiresUserAction={true}
+        javaScriptEnabled={true}
+        domStorageEnabled={true}
+        allowsInlineMediaPlayback={false}
+      />
       <View style={styles.bottomBar}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Image
