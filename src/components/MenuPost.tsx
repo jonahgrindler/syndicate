@@ -1,40 +1,34 @@
 import {MenuView} from '@react-native-menu/menu';
-import React, {useState} from 'react';
-import {
-  View,
-  TextInput,
-  Button,
-  StyleSheet,
-  Text,
-  ActivityIndicator,
-  Platform,
-} from 'react-native';
+import React from 'react';
+import {View, StyleSheet, Platform} from 'react-native';
 import {useFeed} from '../context/FeedContext';
 
 const MenuPost = ({children, postId}) => {
   const {handleSavePost, handleUnsavePost, savedPosts} = useFeed();
 
-  const handlePress = ({nativeEvent, id}) => {
-    console.log('nativeEvent:', nativeEvent);
-    if (nativeEvent.event === 'save') {
-      console.log('saving..', id);
+  const isSaved = savedPosts.some(post => post.post_unique_id === postId);
 
+  const handlePress = ({nativeEvent, id}) => {
+    if (nativeEvent.event === 'save') {
       handleSavePost(id);
+    } else if (nativeEvent.event === 'unsave') {
+      handleUnsavePost(id);
     }
   };
+
   return (
     <MenuView
-      onPressAction={handlePress}
+      onPressAction={({nativeEvent}) => handlePress({nativeEvent, id: postId})}
       actions={[
         {
-          id: 'save',
-          title: 'Save Post',
+          id: isSaved ? 'unsave' : 'save',
+          title: isSaved ? 'Unsave Post' : 'Save Post',
           attributes: {
             destructive: false,
           },
           image: Platform.select({
-            ios: 'bookmark',
-            android: 'ic_menu_edit',
+            ios: isSaved ? 'bookmark.fill' : 'bookmark',
+            android: isSaved ? 'ic_menu_delete' : 'ic_menu_edit',
           }),
         },
       ]}

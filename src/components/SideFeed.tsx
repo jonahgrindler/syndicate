@@ -94,7 +94,7 @@ const SideFeed: React.FC<FeedProps> = () => {
         data={sortedPosts}
         keyExtractor={item => item.post_id.toString()}
         renderItem={({item}) => (
-          <MenuPost postId={item.post_id}>
+          <MenuPost postId={item.post_unique_id}>
             <TouchableOpacity
               style={styles.postContainer}
               onPress={() => handleNavigation(item)}>
