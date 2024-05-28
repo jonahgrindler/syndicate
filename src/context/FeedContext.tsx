@@ -46,9 +46,12 @@ const FeedContext = createContext({
   updateUnseenCount: () => {},
   handleDelete: () => {},
   showSettings: {},
+  loading: true,
+  setLoading: () => {},
 });
 
 export const FeedProvider = ({children}) => {
+  const [loading, setLoading] = useState(true);
   const [feeds, setFeeds] = useState<any>([]);
   const [feedData, setFeedData] = useState<any>([]);
   const [selectedFeedId, setSelectedFeedId] = useState<any>([]);
@@ -61,33 +64,40 @@ export const FeedProvider = ({children}) => {
   // Initialize and load feeds
   useEffect(() => {
     const initializeAndLoadFeeds = async () => {
+      setLoading(true);
       const db = await getDBConnection();
       await createTables(db);
       await setupSettingsTable(db);
       await initializeDataIfNeeded(db);
       await fetchAndStoreFeeds();
+      setLoading(false);
     };
     initializeAndLoadFeeds();
   }, []);
 
   const fetchAndStoreFeeds = async () => {
+    setLoading(true);
     const db = await getDBConnection();
     const feeds = await getFeeds(db);
     const feedsWithPosts = [];
 
     for (const feed of feeds) {
-      // const response = await fetch(feed.channel_url);
-      // const responseData = await response.text();
-      // const parsed = await rssParser.parse(responseData);
       const parsed = await parseFeed(feed.channel_url);
-      // console.log('parsed:', parsed);
 
       const posts = [];
-      let newPostsCount = 0;
       for (const item of parsed.items) {
         // console.log('item.imageUrl:', item.imageUrl);
         const uniqueId = item.id || `${feed.channel_url}-${item.title}`;
-        const link = item.links[0].url;
+        // const link = item.links[0].url;
+        const link = item.links && item.links[0] ? item.links[0].url : '';
+        console.log(
+          'processing post:',
+          item.title,
+          'unique ID:',
+          uniqueId,
+          'Link:',
+          link,
+        );
         const postExists = await postExistsInDB(db, uniqueId);
         if (!postExists) {
           await insertPost(
@@ -135,6 +145,8 @@ export const FeedProvider = ({children}) => {
       return acc;
     }, {});
     setVisibleFeeds(visibility);
+
+    setLoading(false);
   };
 
   const toggleFeedVisibility = id => {
@@ -148,16 +160,16 @@ export const FeedProvider = ({children}) => {
   };
 
   // Add
-  const addNewFeed = async (url: string | URL | Request) => {
+  const addNewFeed = async channelUrl => {
     const db = await getDBConnection();
-    const parsed = await parseFeed(url);
+    const parsed = await parseFeed(channelUrl);
 
     await insertFeed(db, {
-      channel_url: url,
+      channel_url: channelUrl,
       title: parsed.title,
       image: parsed.image.url,
     });
-    await insertPosts(db, url, parsed.items);
+    await insertPosts(db, channelUrl, parsed.items);
     await refreshFeeds();
   };
 
@@ -277,6 +289,7 @@ export const FeedProvider = ({children}) => {
         handleOpenFeed,
         handleDelete,
         showSettings,
+        loading,
       }}>
       {children}
     </FeedContext.Provider>

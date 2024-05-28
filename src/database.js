@@ -141,6 +141,8 @@ export const parseFeed = async url => {
 
     // Transform the parsed data to include imageUrl directly in each item if available
     const itemsWithImages = parsed.items.map(item => {
+      const link = item.links && item.links[0] ? item.links[0].url : '';
+      const uniqueId = item.id || `${url}-${item.title}`;
       let imageUrl = '';
       if (
         item.enclosures &&
@@ -157,7 +159,14 @@ export const parseFeed = async url => {
           imageUrl = match[1];
         }
       }
-      return {...item, imageUrl};
+      return {
+        title: item.title,
+        link: item.links && item.links[0] ? item.links[0].url : '',
+        description: item.description,
+        published: item.published,
+        imageUrl: imageUrl,
+        uniqueId: item.id || `${url}-${item.title}`,
+      };
     });
 
     return {

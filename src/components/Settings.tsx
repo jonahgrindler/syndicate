@@ -120,18 +120,6 @@ const Settings: React.FC = ({feedContent}) => {
           dashColor={primaryColor}
           dashStyle={{borderRadius: 5, marginBottom: 8}}
         />
-        <Text style={[styles.smallTitle, {color: primaryColor}]}>Account</Text>
-        <Text style={[styles.text, {color: primaryColor}]}>Sign Up</Text>
-        <Text style={[styles.text, {color: primaryColor}]}>Sign In</Text>
-      </View>
-      <View style={styles.section}>
-        <DashedLine
-          dashLength={3}
-          dashThickness={3}
-          dashGap={5}
-          dashColor={primaryColor}
-          dashStyle={{borderRadius: 5, marginBottom: 8}}
-        />
         <Text style={[styles.smallTitle, {color: primaryColor}]}>Reset</Text>
         <View style={styles.sectionContent}>
           <ResetDatabase />

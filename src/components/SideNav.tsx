@@ -30,6 +30,7 @@ const SideNav: React.FC = ({feedContent}) => {
     allPosts,
     savedPosts,
     handleDelete,
+    loading,
   } = useFeed();
   const {primaryColor, secondaryColor, highlightColor} = useTheme();
   const [refreshing, setRefreshing] = useState(false);

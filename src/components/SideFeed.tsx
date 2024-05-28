@@ -36,8 +36,11 @@ const SideFeed: React.FC<FeedProps> = () => {
   //   if (selectedFeed) {
   //     console.log('Title:', selectedFeed.title);
   //     console.log('Image:', selectedFeed.image);
+  //     // console.log(selectedFeed.posts);
   //   }
   // }, [selectedFeedId]);
+
+  // console.log(feedData[selectedFeed]);
 
   const flatListRef = useRef(null);
   useEffect(() => {
@@ -52,10 +55,14 @@ const SideFeed: React.FC<FeedProps> = () => {
     >();
   const handleNavigation = (item: FeedItem) => {
     console.log('item:', item);
-    navigation.navigate('FeedWebView', {
-      url: item.link,
-      postId: item.post_unique_id,
-    });
+    if (item.link) {
+      navigation.navigate('FeedWebView', {
+        url: item.link,
+        postId: item.post_unique_id,
+      });
+    } else {
+      console.error('Post link is missing:', item);
+    }
   };
 
   // Sort posts by date
