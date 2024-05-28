@@ -86,39 +86,23 @@ export const FeedProvider = ({children}) => {
 
       const posts = [];
       for (const item of parsed.items) {
-        // console.log('item.imageUrl:', item.imageUrl);
-        const uniqueId = item.id || `${feed.channel_url}-${item.title}`;
-        // const link = item.links[0].url;
-        const link = item.links && item.links[0] ? item.links[0].url : '';
-        console.log(
-          'processing post:',
+        await insertPost(
+          db,
+          feed.channel_url,
           item.title,
-          'unique ID:',
-          uniqueId,
-          'Link:',
-          link,
+          item.link,
+          item.description,
+          item.published,
+          item.imageUrl,
+          item.uniqueId,
         );
-        const postExists = await postExistsInDB(db, uniqueId);
-        if (!postExists) {
-          await insertPost(
-            db,
-            feed.channel_url,
-            item.title,
-            link,
-            item.description,
-            item.published,
-            item.imageUrl,
-            uniqueId,
-          );
-          // newPostsCount += 1;
-        }
         posts.push({
           title: item.title,
-          link: link,
+          link: item.link,
           description: item.description,
           published: item.published,
           imageUrl: item.imageUrl,
-          post_unique_id: uniqueId,
+          post_unique_id: item.uniqueId,
         });
       }
       // Sort posts by date

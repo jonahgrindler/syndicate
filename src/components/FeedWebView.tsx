@@ -21,8 +21,8 @@ const FeedWebView: React.FC<WebViewProps> = ({route}) => {
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
   const {handleSavePost, handleUnsavePost, savedPosts} = useFeed();
   const {url, postId} = route.params;
-  console.log('postId', postId);
-  console.log(savedPosts);
+  // console.log('postId', postId);
+  // console.log(savedPosts);
   const isSaved = savedPosts.some(
     savedPost => savedPost.post_unique_id === postId,
   );

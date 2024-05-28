@@ -54,8 +54,8 @@ const SideFeed: React.FC<FeedProps> = () => {
       NativeStackNavigationProp<RootStackParamList, 'HomeScreen'>
     >();
   const handleNavigation = (item: FeedItem) => {
-    console.log('item:', item);
     if (item.link) {
+      console.log('item link:', item.links);
       navigation.navigate('FeedWebView', {
         url: item.link,
         postId: item.post_unique_id,

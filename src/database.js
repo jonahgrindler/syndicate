@@ -226,8 +226,38 @@ export const insertPost = async (
     if (channelResults[0].rows.length > 0) {
       const channel_id = channelResults[0].rows.item(0).id;
 
-      // Insert the post data into the posts table
-      const insertQuery = `
+      const postResults = await db.executeSql(
+        'SELECT * FROM posts WHERE post_unique_id = ?',
+        [uniqueId],
+      );
+
+      if (postResults[0].rows.length > 0) {
+        // Update existing post
+        const updateQuery = `
+          UPDATE posts SET
+            channel_id = ?, 
+            title = ?,
+            link = ?,
+            description = ?,
+            published = ?,
+            imageUrl = ?
+          WHERE post_unique_id = ?
+        `;
+        await db.executeSql(updateQuery, [
+          channel_id,
+          title,
+          link,
+          description,
+          published,
+          imageUrl,
+          uniqueId,
+        ]);
+        console.log(
+          `Updated post with unique ID: ${uniqueId} for channel: ${channel_id}`,
+        );
+      } else {
+        // Insert the post data into the posts table
+        const insertQuery = `
         INSERT OR IGNORE INTO posts (
           channel_id, 
           title, 
@@ -239,15 +269,16 @@ export const insertPost = async (
           is_viewed
         ) VALUES (?, ?, ?, ?, ?, ?, ?, 0);
       `;
-      await db.executeSql(insertQuery, [
-        channel_id,
-        title,
-        link,
-        description,
-        published,
-        imageUrl,
-        uniqueId,
-      ]);
+        await db.executeSql(insertQuery, [
+          channel_id,
+          title,
+          link,
+          description,
+          published,
+          imageUrl,
+          uniqueId,
+        ]);
+      }
       const updateFeedQuery =
         'UPDATE feeds SET unseen_count = unseen_count + 1 WHERE id = ?';
       await db.executeSql(updateFeedQuery, [feedId]);
