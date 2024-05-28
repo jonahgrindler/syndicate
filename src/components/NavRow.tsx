@@ -49,7 +49,7 @@ const NavRow: React.FC<any> = ({title, selected, newCount, feedId}) => {
         <Text
           style={[
             styles.navText,
-            newCount > 0
+            newCount > 0 && !isSelected
               ? {color: highlightColor, maxWidth: 120, width: 'auto'}
               : {color: primaryColor},
           ]}
@@ -57,7 +57,11 @@ const NavRow: React.FC<any> = ({title, selected, newCount, feedId}) => {
           {title}
         </Text>
         {newCount > 0 ? (
-          <Text style={[styles.newCount, {color: highlightColor}]}>
+          <Text
+            style={[
+              styles.newCount,
+              !isSelected ? {color: highlightColor} : {color: primaryColor},
+            ]}>
             {newCount}
           </Text>
         ) : null}
