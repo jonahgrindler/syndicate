@@ -4,6 +4,7 @@ import {useNavigation} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {colors, fonts, spacing, useTheme} from '../styles/theme';
 import ChannelMenu from './ChannelMenu';
+import {trigger} from 'react-native-haptic-feedback';
 
 const navButton: React.FC<any> = ({label, buttonHeight, to}) => {
   const navigation =
@@ -14,9 +15,23 @@ const navButton: React.FC<any> = ({label, buttonHeight, to}) => {
     navigation.navigate(to);
   };
 
+  // Haptics
+  const options = {
+    enableVibrateFallback: true,
+    ignoreAndroidSystemSettings: false,
+  };
+
+  function haptics() {
+    trigger('impactMedium', options);
+  }
+  function hapticsPressIn() {
+    trigger('impactMedium', options);
+  }
+
   return (
     <TouchableOpacity
-      onPress={() => handleNavigation(to)}
+      onPressIn={hapticsPressIn}
+      onPress={() => [handleNavigation(to), haptics()]}
       style={[
         styles.button,
         {height: buttonHeight, borderColor: primaryColor},

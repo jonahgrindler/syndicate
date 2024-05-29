@@ -8,7 +8,7 @@ import {
   TouchableOpacity,
   RefreshControl,
 } from 'react-native';
-import {SafeAreaView} from 'react-native-safe-area-context';
+import {SafeAreaView, useSafeAreaInsets} from 'react-native-safe-area-context';
 import Feed from './Feed';
 import {colors, fonts, spacing} from '../styles/theme';
 import {useFeed} from '../context/FeedContext';
@@ -34,6 +34,7 @@ const SideNav: React.FC = ({feedContent}) => {
   } = useFeed();
   const {primaryColor, secondaryColor, highlightColor} = useTheme();
   const [refreshing, setRefreshing] = useState(false);
+  const insets = useSafeAreaInsets();
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -42,9 +43,9 @@ const SideNav: React.FC = ({feedContent}) => {
   };
 
   return (
-    <SafeAreaView
-      style={[styles.safeAreaView, {backgroundColor: secondaryColor}]}>
+    <View style={[styles.safeAreaView, {backgroundColor: secondaryColor}]}>
       <ScrollView
+        style={[{paddingTop: insets.top + 8, paddingLeft: insets.left}]}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
@@ -83,22 +84,20 @@ const SideNav: React.FC = ({feedContent}) => {
           feedId={'settings'}
         />
       </ScrollView>
-      <View style={styles.buttons}>
-        {/* <NavButton label={'Post'} buttonHeight={106} to={''} /> */}
+      <View style={[styles.buttons, {paddingBottom: insets.bottom}]}>
         <NavButton label={'Add'} buttonHeight={106} to={'AddFeed'} />
         <NavButton label={'Folder'} buttonHeight={36} to={'AddFeed'} />
       </View>
-    </SafeAreaView>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   safeAreaView: {
     flex: 1,
-    paddingTop: 4,
     paddingBottom: 8,
     paddingLeft: 6,
-    maxWidth: 140,
+    maxWidth: 142,
     justifyContent: 'space-between',
   },
   buttons: {

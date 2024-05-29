@@ -61,33 +61,40 @@ export const setupDefaultFeeds = async (db, userId) => {
   const defaultFeeds = [
     {
       channel_url: 'https://feeds2.feedburner.com/itsnicethat/SlXC',
-      title: 'Its Nice That',
+      custom_title: 'Its Nice That',
     },
     {
       channel_url: 'https://anothergraphic.org/feed/',
-      title: 'Another Graphic',
+      custom_title: 'Another Graphic',
     },
     {
       channel_url: 'https://thecreativeindependent.com/feed.xml',
-      title: 'The Creative Independent',
+      custom_title: 'The Creative Independent',
     },
     {
       channel_url: 'https://www.hoverstat.es/rss.xml',
-      title: 'hoverstat.es',
+      custom_title: 'hoverstat.es',
     },
     {
       channel_url: 'https://sidebar.io/feed.xml',
-      title: 'Sidebar',
+      custom_title: 'Sidebar',
     },
     {
       channel_url: 'https://feeds.feedburner.com/pudding/feed',
-      title: 'The Pudding',
+      custom_title: 'The Pudding',
+    },
+    {
+      channel_url: 'https://pitchfork.com/feed/feed-news/rss',
+      custom_title: 'Pitchfork',
     },
   ];
-  const insertFeedSql = `INSERT INTO feeds (channel_url, title) VALUES (?, ?);`;
+  const insertFeedSql = `INSERT INTO feeds (channel_url, custom_title) VALUES (?, ?);`;
 
   for (let feed of defaultFeeds) {
-    await insertFeed(db, {channel_url: feed.channel_url});
+    await insertFeed(db, {
+      channel_url: feed.channel_url,
+      custom_title: feed.custom_title,
+    });
   }
 };
 
@@ -182,7 +189,7 @@ export const parseFeed = async url => {
 };
 
 export const insertFeed = async (db, feed) => {
-  const {channel_url} = feed;
+  const {channel_url, custom_title} = feed;
   console.log('url', channel_url);
   const parsed = await parseFeed(channel_url);
 
@@ -193,7 +200,7 @@ export const insertFeed = async (db, feed) => {
     await db.executeSql(insertQuery, [
       channel_url,
       parsed.title,
-      '',
+      custom_title || '',
       parsed.image.url,
     ]);
     console.log(

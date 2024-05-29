@@ -21,7 +21,7 @@ const NavRow: React.FC<any> = ({title, selected, newCount, feedId}) => {
     }
   }, [selectedFeedId]);
 
-  // Optional configuration
+  // Haptics
   const options = {
     enableVibrateFallback: true,
     ignoreAndroidSystemSettings: false,
@@ -48,25 +48,27 @@ const NavRow: React.FC<any> = ({title, selected, newCount, feedId}) => {
         {isSelected ? (
           <View style={[styles.dot, {backgroundColor: primaryColor}]} />
         ) : null}
-        <Text
-          style={[
-            styles.navText,
-            newCount > 0 && !isSelected
-              ? {color: highlightColor, maxWidth: 120, width: 'auto'}
-              : {color: primaryColor},
-          ]}
-          numberOfLines={1}>
-          {title}
-        </Text>
-        {newCount > 0 ? (
+        <View style={styles.textAndNumber}>
           <Text
             style={[
-              styles.newCount,
-              !isSelected ? {color: highlightColor} : {color: primaryColor},
-            ]}>
-            {newCount}
+              styles.navText,
+              newCount > 0 && !isSelected
+                ? {color: highlightColor, width: 'auto'}
+                : {color: primaryColor},
+            ]}
+            numberOfLines={1}>
+            {title}
           </Text>
-        ) : null}
+          {newCount > 0 ? (
+            <Text
+              style={[
+                styles.newCount,
+                !isSelected ? {color: highlightColor} : {color: primaryColor},
+              ]}>
+              {newCount}
+            </Text>
+          ) : null}
+        </View>
       </TouchableOpacity>
     </ChannelMenu>
   );
@@ -75,7 +77,7 @@ const NavRow: React.FC<any> = ({title, selected, newCount, feedId}) => {
 const styles = StyleSheet.create({
   navRow: {
     flexDirection: 'row',
-    alignItems: 'baseline',
+    alignItems: 'center',
     justifyContent: 'flex-start',
   },
   dot: {
@@ -85,12 +87,17 @@ const styles = StyleSheet.create({
     backgroundColor: colors.highlight,
     marginRight: 3,
   },
+  textAndNumber: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+  },
   navText: {
     fontSize: fonts.size.nav,
     lineHeight: fonts.lineHeight.nav,
     fontWeight: fonts.weight.semibold,
     letterSpacing: -0.2,
     color: colors.primary,
+    flexShrink: 1,
   },
   newCount: {
     fontSize: 12,

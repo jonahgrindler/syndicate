@@ -15,7 +15,19 @@ const fetchFeedSuggestions = async (inputUrl, signal) => {
     url = 'https://' + url;
   }
 
-  const tryFetch = async urlToTry => {
+  const tryFetchFeed = async urlToTry => {
+    try {
+      const response = await fetch(urlToTry, {signal});
+      const feedText = await response.text();
+      const feed = await rssParser.parse(feedText);
+      return [{url: urlToTry, title: feed.title, icon: feed.image?.url}];
+    } catch (error) {
+      console.warn(`Failed to parse feed at ${urlToTry}:`, error);
+      return null;
+    }
+  };
+
+  const tryFetchHtml = async urlToTry => {
     try {
       const response = await fetch(urlToTry, {signal});
       const html = await response.text();
@@ -33,8 +45,6 @@ const fetchFeedSuggestions = async (inputUrl, signal) => {
           rssLinks.push(feedUrl);
         }
       }
-
-      // return rssLinks;
 
       // Fetch feed info for each RSS link
       const feeds = await Promise.all(
@@ -64,13 +74,19 @@ const fetchFeedSuggestions = async (inputUrl, signal) => {
     }
   };
 
-  let suggestions = await tryFetch(url);
+  // Try fetching as a direct feed
+  let suggestions = await tryFetchFeed(url);
+
+  if (!suggestions || suggestions.length === 0) {
+    // If direct feed fetch fails, try fetching as HTML
+    suggestions = await tryFetchHtml(url);
+  }
 
   // If no suggestions and the URL doesn't already have a TLD, try adding .com
   if (suggestions.length === 0 && !/\.[a-z]{2,}$/.test(url)) {
     url = url.replace(/^https?:\/\//i, ''); // Remove protocol for better handling
     url = `https://${url}.com`;
-    suggestions = await tryFetch(url);
+    suggestions = await tryFetchHtml(url);
   }
 
   return suggestions;

@@ -12,11 +12,7 @@ import {
 } from 'react-native';
 import {FeedProps, FeedItem} from '../types/FeedTypes';
 import {RootStackParamList} from '../types/RootStackParamList';
-import {
-  SafeAreaInsetsContext,
-  useSafeAreaInsets,
-  SafeAreaView,
-} from 'react-native-safe-area-context';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import DashedLine from 'react-native-dashed-line';
 import {colors, fonts, spacing} from '../styles/theme';
 import {useFeed} from '../context/FeedContext';
@@ -98,7 +94,10 @@ const SideFeed: React.FC<FeedProps> = () => {
         </View> */}
       <FlatList
         ref={flatListRef}
-        style={[styles.scrollView, {paddingTop: insets.top + 8}]}
+        style={[
+          styles.scrollView,
+          {paddingTop: insets.top + 8, paddingBottom: insets.bottom + 80},
+        ]}
         data={sortedPosts}
         keyExtractor={item => item.post_id.toString()}
         renderItem={({item}) => (
