@@ -173,7 +173,6 @@ const AddFeed: React.FC = () => {
 };
 const styles = StyleSheet.create({
   safeView: {
-    backgroundColor: colors.dark.background,
     flex: 1,
   },
   navigation: {

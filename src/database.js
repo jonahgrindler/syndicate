@@ -27,6 +27,7 @@ export const createTables = async db => {
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       channel_url TEXT UNIQUE,
       title TEXT,
+      custom_title TEXT,
       image TEXT,
       image_size BOOLEAN DEFAULT 0,
       unseen_count INTEGER DEFAULT 0,
@@ -184,15 +185,15 @@ export const insertFeed = async (db, feed) => {
   const {channel_url} = feed;
   console.log('url', channel_url);
   const parsed = await parseFeed(channel_url);
-  // console.log(parsed.image.url);
 
   try {
     const insertQuery = `
-      INSERT OR IGNORE INTO feeds (channel_url, title, image, show_in_everything ) VALUES (?, ?, ?, 1);
+      INSERT OR IGNORE INTO feeds (channel_url, title, custom_title, image, show_in_everything ) VALUES (?, ?, ?, ?, 1);
   `;
     await db.executeSql(insertQuery, [
       channel_url,
       parsed.title,
+      '',
       parsed.image.url,
     ]);
     console.log(
@@ -309,7 +310,6 @@ export const insertPosts = async (db, channelUrl, posts) => {
   }
 };
 
-// Function to mark a post as saved
 export const savePost = async (db, postId) => {
   await db.executeSql(
     'UPDATE posts SET is_saved = 1 WHERE post_unique_id = ?',
@@ -317,7 +317,6 @@ export const savePost = async (db, postId) => {
   );
 };
 
-// Function to unmark a post as saved
 export const unsavePost = async (db, postId) => {
   await db.executeSql(
     'UPDATE posts SET is_saved = 0 WHERE post_unique_id = ?',
@@ -325,7 +324,6 @@ export const unsavePost = async (db, postId) => {
   );
 };
 
-// Function to fetch saved posts
 export const getSavedPosts = async db => {
   const results = await db.executeSql('SELECT * FROM posts WHERE is_saved = 1');
   let posts = [];
@@ -416,7 +414,7 @@ export const getFeeds = async db => {
   try {
     const feeds = [];
     const results = await db.executeSql(
-      `SELECT id, channel_url, title, show_in_everything FROM feeds;`,
+      `SELECT id, channel_url, title, custom_title, show_in_everything FROM feeds;`,
     );
     results.forEach(result => {
       for (let index = 0; index < result.rows.length; index++) {
@@ -434,6 +432,14 @@ export const toggleShowInEverything = async (db, feedId, currentValue) => {
   const newValue = currentValue ? 0 : 1;
   await db.executeSql('UPDATE feeds SET show_in_everything = ? WHERE id = ?', [
     newValue,
+    feedId,
+  ]);
+};
+
+export const renameFeed = async (db, feedId, newTitle) => {
+  console.log('renaming:', feedId, newTitle);
+  await db.executeSql('UPDATE feeds SET custom_title = ? WHERE id = ?', [
+    newTitle,
     feedId,
   ]);
 };

@@ -18,6 +18,7 @@ import {
   updateUnseenCount,
   parseFeed,
   toggleShowInEverything,
+  renameFeed,
   deleteFeed,
   viewFeed,
 } from '../database';
@@ -46,6 +47,7 @@ const FeedContext = createContext({
   markPostsAsSeen: () => {},
   updateUnseenCount: () => {},
   toggleFeedShowInEverything: () => {},
+  handleRenameFeed: () => {},
   handleDelete: () => {},
   showSettings: {},
   loading: true,
@@ -81,6 +83,7 @@ export const FeedProvider = ({children}) => {
     setLoading(true);
     const db = await getDBConnection();
     const feeds = await getFeeds(db);
+    // console.log('feeds:', feeds);
     const feedsWithPosts = [];
 
     for (const feed of feeds) {
@@ -114,7 +117,7 @@ export const FeedProvider = ({children}) => {
 
       feedsWithPosts.push({
         ...feed,
-        title: parsed.title,
+        title: feed.custom_title || parsed.title,
         posts: posts,
         image: parsed.image?.url,
         unseenCount: unseenCount,
@@ -248,6 +251,13 @@ export const FeedProvider = ({children}) => {
     setSavedPosts(updatedSavedPosts); // Update the state with the new list of saved posts
   };
 
+  const handleRenameFeed = async (feedId, newTitle) => {
+    const db = await getDBConnection();
+    renameFeed(db, feedId, newTitle);
+    // console.log('renamed:', feedId, newTitle);
+    await refreshFeeds();
+  };
+
   const handleDelete = async (feedId: any) => {
     const db = await getDBConnection();
     await deleteFeed(db, feedId);
@@ -273,6 +283,7 @@ export const FeedProvider = ({children}) => {
         handleUnsavePost,
         handleOpenFeed,
         toggleFeedShowInEverything,
+        handleRenameFeed,
         handleDelete,
         showSettings,
         loading,

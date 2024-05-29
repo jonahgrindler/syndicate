@@ -68,7 +68,7 @@ const SideNav: React.FC = ({feedContent}) => {
         {feedData.map(feed => (
           <View key={feed.id} style={styles.channel}>
             <NavRow
-              title={feed.title}
+              title={feed.custom_title ? feed.custom_title : feed.title}
               selected={false}
               newCount={feed.unseenCount}
               feedId={feed.id}

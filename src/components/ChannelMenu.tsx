@@ -1,5 +1,8 @@
 import {MenuView} from '@react-native-menu/menu';
 import React, {useState} from 'react';
+import {useNavigation} from '@react-navigation/native';
+import {NativeStackNavigationProp} from '@react-navigation/native-stack';
+import {RootStackParamList} from '../types/RootStackParamList';
 import {
   View,
   TextInput,
@@ -32,10 +35,20 @@ const ChannelMenu = ({
     }
   };
 
+  const navigation =
+    useNavigation<NativeStackNavigationProp<RootStackParamList, 'EditFeed'>>();
+
+  const navigateToRenameFeed = () => {
+    navigation.navigate('EditFeed', {
+      feedId: feedId,
+      currentTitle: feedTitle,
+    });
+  };
+
   return (
     <MenuView
       title={feedTitle}
-      onPressAction={handlePress}
+      onPressAction={navigateToRenameFeed}
       actions={[
         {
           id: 'rename',

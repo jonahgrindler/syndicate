@@ -39,7 +39,8 @@ const NavRow: React.FC<any> = ({title, selected, newCount, feedId}) => {
       onDelete={handleDelete}
       feedId={feedId}
       feedTitle={title}
-      currentShowInEverything={selectedFeed?.show_in_everything || false}>
+      currentShowInEverything={selectedFeed?.show_in_everything || false}
+      currentTitle={title}>
       <TouchableOpacity
         style={styles.navRow}
         onPressIn={hapticsPressIn}
