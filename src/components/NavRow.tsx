@@ -6,15 +6,12 @@ import {trigger} from 'react-native-haptic-feedback';
 import ChannelMenu from './ChannelMenu';
 
 const NavRow: React.FC<any> = ({title, selected, newCount, feedId}) => {
-  const {
-    handleSelectedFeedId,
-    selectedFeedId,
-    handleDelete,
-    showSaved,
-    setShowSaved,
-  } = useFeed();
+  const {feedData, handleSelectedFeedId, selectedFeedId, handleDelete} =
+    useFeed();
   const {primaryColor, secondaryColor, highlightColor} = useTheme();
   const [isSelected, setIsSelected] = useState(false);
+
+  const selectedFeed = feedData.find(feed => feed.id === feedId);
 
   useEffect(() => {
     if (feedId === selectedFeedId) {
@@ -38,7 +35,11 @@ const NavRow: React.FC<any> = ({title, selected, newCount, feedId}) => {
   }
 
   return (
-    <ChannelMenu onDelete={handleDelete} feedId={feedId} feedTitle={title}>
+    <ChannelMenu
+      onDelete={handleDelete}
+      feedId={feedId}
+      feedTitle={title}
+      currentShowInEverything={selectedFeed?.show_in_everything || false}>
       <TouchableOpacity
         style={styles.navRow}
         onPressIn={hapticsPressIn}

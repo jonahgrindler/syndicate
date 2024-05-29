@@ -29,7 +29,8 @@ export const createTables = async db => {
       title TEXT,
       image TEXT,
       image_size BOOLEAN DEFAULT 0,
-      unseen_count INTEGER DEFAULT 0
+      unseen_count INTEGER DEFAULT 0,
+      show_in_everything INTEGER DEFAULT 1
     );
   `;
   const queryPosts = `
@@ -187,7 +188,7 @@ export const insertFeed = async (db, feed) => {
 
   try {
     const insertQuery = `
-      INSERT OR IGNORE INTO feeds (channel_url, title, image) VALUES (?, ?, ?);
+      INSERT OR IGNORE INTO feeds (channel_url, title, image, show_in_everything ) VALUES (?, ?, ?, 1);
   `;
     await db.executeSql(insertQuery, [
       channel_url,
@@ -252,9 +253,9 @@ export const insertPost = async (
           imageUrl,
           uniqueId,
         ]);
-        console.log(
-          `Updated post with unique ID: ${uniqueId} for channel: ${channel_id}`,
-        );
+        // console.log(
+        //   `Updated post with unique ID: ${uniqueId} for channel: ${channel_id}`,
+        // );
       } else {
         // Insert the post data into the posts table
         const insertQuery = `
@@ -414,7 +415,9 @@ export const fetchPostsForFeed = async (db, feedId) => {
 export const getFeeds = async db => {
   try {
     const feeds = [];
-    const results = await db.executeSql(`SELECT id, channel_url FROM feeds;`);
+    const results = await db.executeSql(
+      `SELECT id, channel_url, title, show_in_everything FROM feeds;`,
+    );
     results.forEach(result => {
       for (let index = 0; index < result.rows.length; index++) {
         feeds.push(result.rows.item(index));
@@ -425,6 +428,14 @@ export const getFeeds = async db => {
     console.error(error);
     throw Error('Failed to get feeds from database');
   }
+};
+
+export const toggleShowInEverything = async (db, feedId, currentValue) => {
+  const newValue = currentValue ? 0 : 1;
+  await db.executeSql('UPDATE feeds SET show_in_everything = ? WHERE id = ?', [
+    newValue,
+    feedId,
+  ]);
 };
 
 export const deleteFeed = async (db, feedId) => {

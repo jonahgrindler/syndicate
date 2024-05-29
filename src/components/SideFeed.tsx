@@ -25,7 +25,8 @@ import Settings from './Settings';
 import MenuPost from './MenuPost';
 
 const SideFeed: React.FC<FeedProps> = () => {
-  const {feedData, feeds, posts, showSettings, selectedFeedId} = useFeed();
+  const {feedData, feeds, posts, showSettings, selectedFeedId, loadAllPosts} =
+    useFeed();
   const {primaryColor, secondaryColor} = useTheme();
   const insets = useSafeAreaInsets();
 
@@ -43,6 +44,13 @@ const SideFeed: React.FC<FeedProps> = () => {
   // console.log(feedData[selectedFeed]);
 
   const flatListRef = useRef(null);
+
+  useEffect(() => {
+    if (selectedFeedId === 'everything') {
+      loadAllPosts();
+    }
+  }, [selectedFeedId, feedData]);
+
   useEffect(() => {
     if (flatListRef.current) {
       flatListRef.current.scrollToOffset({animated: false, offset: 0});
@@ -106,10 +114,7 @@ const SideFeed: React.FC<FeedProps> = () => {
                 dashStyle={{borderRadius: 5, marginBottom: 8}}
               />
               {item.imageUrl ? (
-                <Image
-                  source={{uri: item.imageUrl}}
-                  style={[styles.postImage]}
-                />
+                <Image source={{uri: item.imageUrl}} style={styles.postImage} />
               ) : null}
               <Text style={[styles.postTitle, {color: primaryColor}]}>
                 {item.title}
@@ -152,8 +157,8 @@ const styles = StyleSheet.create({
     borderRadius: 1,
     // borderStyle: 'dotted',
     borderColor: colors.primary,
-    paddingTop: 8,
-    paddingBottom: 40,
+    paddingTop: 0,
+    paddingBottom: 48,
   },
   postTitle: {
     fontSize: 22,
@@ -170,12 +175,9 @@ const styles = StyleSheet.create({
   },
   postImage: {
     width: '100%',
-    height: 160,
+    height: 'auto',
     marginBottom: 8,
-    // borderRadius: 1,
-    // borderWidth: 3,
-    borderStyle: 'dashed',
-    borderColor: colors.secondary,
+    aspectRatio: 4 / 3,
   },
 });
 

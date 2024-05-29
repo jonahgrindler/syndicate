@@ -17,6 +17,7 @@ import {
   markPostsAsSeen,
   updateUnseenCount,
   parseFeed,
+  toggleShowInEverything,
   deleteFeed,
   viewFeed,
 } from '../database';
@@ -44,6 +45,7 @@ const FeedContext = createContext({
   countNewPosts: () => {},
   markPostsAsSeen: () => {},
   updateUnseenCount: () => {},
+  toggleFeedShowInEverything: () => {},
   handleDelete: () => {},
   showSettings: {},
   loading: true,
@@ -159,6 +161,7 @@ export const FeedProvider = ({children}) => {
 
   const refreshFeeds = async () => {
     await fetchAndStoreFeeds();
+    await loadAllPosts();
   };
 
   const handleSelectedFeedId = async feedId => {
@@ -171,10 +174,10 @@ export const FeedProvider = ({children}) => {
 
   useEffect(() => {
     const loadPosts = async () => {
+      const db = await getDBConnection();
       if (selectedFeedId === 'saved') {
         console.log('Nav: saved');
         setShowSettings(false);
-        const db = await getDBConnection();
         const savedPostsList = await getSavedPosts(db);
         setSavedPosts(savedPostsList);
         setPosts(savedPosts);
@@ -183,13 +186,13 @@ export const FeedProvider = ({children}) => {
         setPosts([]);
         setShowSettings(true);
       } else if (selectedFeedId === 'everything') {
-        // Show all posts
+        // Show all posts (that aren't excluded)
         setShowSettings(false);
+
         setPosts(allPosts);
       } else if (selectedFeedId) {
         // Show a feed
         setShowSettings(false);
-        const db = await getDBConnection();
         const loadedPosts = await fetchPostsForFeed(db, selectedFeedId);
         setPosts(loadedPosts);
       } else {
@@ -199,20 +202,20 @@ export const FeedProvider = ({children}) => {
     };
 
     loadPosts();
-  }, [selectedFeedId]);
+  }, [selectedFeedId, feedData]);
 
   const loadAllPosts = async () => {
     const db = await getDBConnection();
     const feeds = await getFeeds(db);
-    // let posts = [];
-    // let posts: Post[] = [];
     let posts: any[] = [];
 
     for (const feed of feeds) {
-      const fetchedPosts = await fetchPostsForFeed(db, feed.id);
-      posts = posts.concat(
-        fetchedPosts.map(post => ({...post, feedTitle: feed.title})),
-      );
+      if (feed.show_in_everything) {
+        const fetchedPosts = await fetchPostsForFeed(db, feed.id);
+        posts = posts.concat(
+          fetchedPosts.map(post => ({...post, feedTitle: feed.title})),
+        );
+      }
     }
 
     posts.sort((a, b) => new Date(b.published) - new Date(a.published)); // Sort posts by date
@@ -223,15 +226,13 @@ export const FeedProvider = ({children}) => {
     loadAllPosts();
   }, []);
 
-  // Saved Posts
-  useEffect(() => {
-    const loadPosts = async () => {
-      const db = await getDBConnection();
-      const posts = await getSavedPosts(db);
-      setSavedPosts(posts);
-    };
-    loadPosts();
-  }, []);
+  const toggleFeedShowInEverything = async (feedId, currentValue) => {
+    const db = await getDBConnection();
+    console.log('ToggleFeedShowInEverything', feedId, currentValue);
+    await toggleShowInEverything(db, feedId, currentValue);
+    await refreshFeeds();
+    await loadAllPosts();
+  };
 
   const handleSavePost = async (postId: any) => {
     const db = await getDBConnection();
@@ -271,6 +272,7 @@ export const FeedProvider = ({children}) => {
         handleSavePost,
         handleUnsavePost,
         handleOpenFeed,
+        toggleFeedShowInEverything,
         handleDelete,
         showSettings,
         loading,
