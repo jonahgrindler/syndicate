@@ -28,7 +28,8 @@ const debounce = (func, wait) => {
 };
 
 const AddFeed: React.FC = () => {
-  const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
+  const navigation =
+    useNavigation<StackNavigationProp<RootStackParamList, 'AddFeed'>>();
   const {primaryColor, secondaryColor, highlightColor} = useTheme();
   const {addNewFeed} = useFeed();
   const [newFeedUrl, setNewFeedUrl] = useState('');

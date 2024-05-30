@@ -23,7 +23,9 @@ const ChannelMenu = ({
 }) => {
   const {toggleFeedShowInEverything, feedData} = useFeed();
   const navigation =
-    useNavigation<NativeStackNavigationProp<RootStackParamList, 'EditFeed'>>();
+    useNavigation<
+      NativeStackNavigationProp<RootStackParamList, 'HomeScreen'>
+    >();
 
   const selectedFeed = feedData.find(feed => feed.id === feedId);
   const handlePress = ({nativeEvent, id}) => {
