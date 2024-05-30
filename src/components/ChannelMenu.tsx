@@ -22,6 +22,8 @@ const ChannelMenu = ({
   currentShowInEverything,
 }) => {
   const {toggleFeedShowInEverything, feedData} = useFeed();
+  const navigation =
+    useNavigation<NativeStackNavigationProp<RootStackParamList, 'EditFeed'>>();
 
   const selectedFeed = feedData.find(feed => feed.id === feedId);
   const handlePress = ({nativeEvent, id}) => {
@@ -33,22 +35,18 @@ const ChannelMenu = ({
     if (nativeEvent.event === 'destructive') {
       onDelete(feedId);
     }
-  };
-
-  const navigation =
-    useNavigation<NativeStackNavigationProp<RootStackParamList, 'EditFeed'>>();
-
-  const navigateToRenameFeed = () => {
-    navigation.navigate('EditFeed', {
-      feedId: feedId,
-      currentTitle: feedTitle,
-    });
+    if (nativeEvent.event === 'rename') {
+      navigation.navigate('EditFeed', {
+        feedId: feedId,
+        currentTitle: feedTitle,
+      });
+    }
   };
 
   return (
     <MenuView
       title={feedTitle}
-      onPressAction={navigateToRenameFeed}
+      onPressAction={handlePress}
       actions={[
         {
           id: 'rename',
