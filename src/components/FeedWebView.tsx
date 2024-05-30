@@ -10,7 +10,7 @@ import {WebView} from 'react-native-webview';
 import {useNavigation, RouteProp} from '@react-navigation/native';
 import {RootStackParamList} from '../types/RootStackParamList';
 import {StackNavigationProp} from '@react-navigation/stack';
-import {colors, spacing} from '../styles/theme';
+import {colors, fonts, spacing, useTheme} from '../styles/theme';
 import {useFeed} from '../context/FeedContext';
 
 type WebViewProps = {
@@ -18,6 +18,7 @@ type WebViewProps = {
 };
 
 const FeedWebView: React.FC<WebViewProps> = ({route}) => {
+  const {primaryColor, secondaryColor, highlightColor} = useTheme();
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
   const {handleSavePost, handleUnsavePost, savedPosts} = useFeed();
   const {url, postId} = route.params;
@@ -29,7 +30,7 @@ const FeedWebView: React.FC<WebViewProps> = ({route}) => {
   console.log(isSaved);
 
   return (
-    <SafeAreaView style={styles.webView}>
+    <SafeAreaView style={[styles.webView, {backgroundColor: secondaryColor}]}>
       <WebView
         useWebKit={true}
         source={{uri: url}}
@@ -39,25 +40,25 @@ const FeedWebView: React.FC<WebViewProps> = ({route}) => {
         domStorageEnabled={true}
         allowsInlineMediaPlayback={false}
       />
-      <View style={styles.bottomBar}>
+      <View style={[styles.bottomBar, {backgroundColor: secondaryColor}]}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Image
             source={require('../../assets/icons/chevron-left.png')}
-            tintColor={colors.primary}
+            tintColor={primaryColor}
           />
         </TouchableOpacity>
         {isSaved ? (
           <TouchableOpacity onPress={() => handleUnsavePost(postId)}>
             <Image
               source={require('../../assets/icons/save-fill.png')}
-              tintColor={colors.primary}
+              tintColor={primaryColor}
             />
           </TouchableOpacity>
         ) : (
           <TouchableOpacity onPress={() => handleSavePost(postId)}>
             <Image
               source={require('../../assets/icons/save.png')}
-              tintColor={colors.primary}
+              tintColor={primaryColor}
             />
           </TouchableOpacity>
         )}
