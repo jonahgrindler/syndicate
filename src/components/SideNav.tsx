@@ -45,7 +45,7 @@ const SideNav: React.FC = ({feedContent}) => {
   return (
     <View style={[styles.safeAreaView, {backgroundColor: secondaryColor}]}>
       <ScrollView
-        style={[{paddingTop: insets.top + 8, paddingLeft: insets.left}]}
+        style={[{paddingTop: insets.top + 4, paddingLeft: insets.left}]}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}

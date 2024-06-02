@@ -7,6 +7,13 @@ const ensureHttps = url => {
   return url;
 };
 
+const removeTrailingSlash = url => {
+  if (url.endsWith('/')) {
+    return url.slice(0, -1);
+  }
+  return url;
+};
+
 const fetchFeedSuggestions = async (inputUrl, signal) => {
   let url = inputUrl;
 
@@ -18,8 +25,12 @@ const fetchFeedSuggestions = async (inputUrl, signal) => {
   const tryFetchFeed = async urlToTry => {
     try {
       const response = await fetch(urlToTry, {signal});
+      if (!response.ok) {
+        throw new Error(`Network response was not ok: ${response.statusText}`);
+      }
       const feedText = await response.text();
       const feed = await rssParser.parse(feedText);
+      console.log('feed', feed);
       return [{url: urlToTry, title: feed.title, icon: feed.image?.url}];
     } catch (error) {
       console.warn(`Failed to parse feed at ${urlToTry}:`, error);
@@ -30,27 +41,47 @@ const fetchFeedSuggestions = async (inputUrl, signal) => {
   const tryFetchHtml = async urlToTry => {
     try {
       const response = await fetch(urlToTry, {signal});
+      if (!response.ok) {
+        throw new Error(`Network response was not ok: ${response.statusText}`);
+      }
       const html = await response.text();
 
       // Use regex or a DOM parser to find RSS/Atom links if not a direct feed
       const rssLinks = [];
       const linkRegex =
         /<link[^>]+rel="alternate"[^>]+type="application\/(rss\+xml|atom\+xml)"[^>]*>/gi;
+      const aTagRegex = /<a[^>]+href="([^"]+\.xml)"[^>]*>.*<\/a>/gi;
+
       let match;
       while ((match = linkRegex.exec(html)) !== null) {
         const hrefMatch = /href="([^"]+)"/.exec(match[0]);
         if (hrefMatch) {
           // Resolve relative URLs
           const feedUrl = ensureHttps(new URL(hrefMatch[1], urlToTry).href);
-          rssLinks.push(feedUrl);
+          rssLinks.push(removeTrailingSlash(feedUrl));
+        }
+      }
+
+      while ((match = aTagRegex.exec(html)) !== null) {
+        const hrefMatch = /href="([^"]+\.xml)"/.exec(match[0]);
+        if (hrefMatch) {
+          // Resolve relative URLs
+          const feedUrl = ensureHttps(new URL(hrefMatch[1], urlToTry).href);
+          rssLinks.push(removeTrailingSlash(feedUrl));
         }
       }
 
       // Fetch feed info for each RSS link
+      console.log('rss links', rssLinks);
       const feeds = await Promise.all(
         rssLinks.map(async link => {
           try {
-            const feedResponse = await fetch(link);
+            const feedResponse = await fetch(link, {signal});
+            if (!feedResponse.ok) {
+              throw new Error(
+                `Network response was not ok: ${feedResponse.statusText}`,
+              );
+            }
             const feedText = await feedResponse.text();
             const feed = await rssParser.parse(feedText);
             return {url: link, title: feed.title, icon: feed.image?.url};

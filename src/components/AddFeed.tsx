@@ -11,6 +11,7 @@ import {
   Text,
   FlatList,
   Alert,
+  ActivityIndicator,
 } from 'react-native';
 import {RootStackParamList} from '../types/RootStackParamList';
 import {StackNavigationProp} from '@react-navigation/stack';
@@ -32,22 +33,23 @@ const AddFeed: React.FC = () => {
     useNavigation<StackNavigationProp<RootStackParamList, 'AddFeed'>>();
   const {primaryColor, secondaryColor, highlightColor} = useTheme();
   const {addNewFeed} = useFeed();
-  const [newFeedUrl, setNewFeedUrl] = useState('');
+  const [inputUrl, setInputUrl] = useState('');
   const [suggestions, setSuggestions] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [pendingAdd, setPendingAdd] = useState(false);
   const controllerRef = useRef(null);
 
-  const fetchSuggestions = async inputUrl => {
+  const fetchSuggestions = async () => {
+    setLoading(true);
     if (controllerRef.current) {
       controllerRef.current.abort();
     }
-    controllerRef.current = new AbortController();
-    const signal = controllerRef.current.signal;
-
-    setLoading(true);
+    // controllerRef.current = new AbortController();
+    // const signal = controllerRef.current.signal;
     try {
-      const feeds = await fetchFeedSuggestions(inputUrl, signal);
-      setSuggestions(feeds);
+      const signal = new AbortController().signal;
+      const fetchedSuggestions = await fetchFeedSuggestions(inputUrl, signal);
+      setSuggestions(fetchedSuggestions);
     } catch (error) {
       if (error.name !== 'AbortError') {
         console.error('Error fetching feed suggestions:', error);
@@ -60,38 +62,23 @@ const AddFeed: React.FC = () => {
     setLoading(false);
   };
 
-  const debouncedFetchSuggestions = debounce(fetchSuggestions, 300);
+  const debouncedFetchSuggestions = debounce(fetchSuggestions, 10);
 
   useEffect(() => {
-    if (newFeedUrl) {
-      debouncedFetchSuggestions(newFeedUrl);
-    } else {
-      setSuggestions([]);
-    }
-    // if (newFeedUrl) {
-    //   const fetchSuggestions = async () => {
-    //     setLoading(true);
-    //     const feeds = await fetchFeedSuggestions(newFeedUrl);
-    //     setSuggestions(feeds);
-    //     setLoading(false);
-    //   };
-
-    //   fetchSuggestions();
-    // } else {
-    //   setSuggestions([]);
-    // }
-  }, [newFeedUrl]);
+    debouncedFetchSuggestions(inputUrl);
+  }, [inputUrl]);
 
   // Adding a new Feed
   const handleAddFeed = async feedUrl => {
     const fetchFeed = async () => {
-      if (!newFeedUrl) {
+      if (!inputUrl) {
         console.error('No URL provided');
         return;
       }
       try {
+        setPendingAdd(true);
         await addNewFeed(feedUrl);
-        setNewFeedUrl('');
+        // setInputUrl('');
         navigation.goBack();
       } catch (error) {
         console.error('Failed to fetch or parse feeds:', error);
@@ -120,8 +107,8 @@ const AddFeed: React.FC = () => {
       <TextInput
         style={[styles.input, {color: primaryColor, borderColor: primaryColor}]}
         placeholderTextColor={primaryColor}
-        onChangeText={setNewFeedUrl}
-        value={newFeedUrl}
+        onChangeText={setInputUrl}
+        value={inputUrl}
         placeholder="Website or feed URL"
         autoCapitalize="none"
       />
@@ -138,6 +125,7 @@ const AddFeed: React.FC = () => {
 
       <FlatList
         style={styles.suggestionList}
+        keyboardShouldPersistTaps="always"
         data={suggestions}
         keyExtractor={(item, index) => index.toString()}
         renderItem={({item}) => (
@@ -145,18 +133,27 @@ const AddFeed: React.FC = () => {
             onPress={() => handleAddFeed(item.url)}
             style={styles.suggestion}>
             <View style={styles.iconTitle}>
-              {item.icon && (
+              {/* {item.icon && (
                 <Image source={{uri: item.icon}} style={styles.icon} />
-              )}
-              <Text style={[styles.text, {color: primaryColor}]}>
-                {item.title || item.url}
-              </Text>
+              )} */}
+              <View>
+                <Text style={[styles.text, {color: primaryColor}]}>
+                  {item.title || item.url}
+                </Text>
+                <Text style={[styles.textSmall, {color: primaryColor}]}>
+                  {item.url}
+                </Text>
+              </View>
             </View>
             <View style={[styles.plusIcon, {borderColor: primaryColor}]}>
-              <Image
-                source={require('../../assets/icons/plus.png')}
-                tintColor={primaryColor}
-              />
+              {pendingAdd ? (
+                <ActivityIndicator size="small" color={primaryColor} />
+              ) : (
+                <Image
+                  source={require('../../assets/icons/plus.png')}
+                  tintColor={primaryColor}
+                />
+              )}
             </View>
           </TouchableOpacity>
         )}
@@ -225,8 +222,8 @@ const styles = StyleSheet.create({
     flexShrink: 1,
   },
   icon: {
-    width: 40,
-    height: 40,
+    width: 44,
+    height: 44,
     borderRadius: 40,
   },
   text: {
@@ -237,7 +234,10 @@ const styles = StyleSheet.create({
   plusIcon: {
     borderWidth: 2,
     borderRadius: 40,
-    padding: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: 44,
+    height: 44,
   },
   buttonText: {
     fontSize: fonts.size.large,
