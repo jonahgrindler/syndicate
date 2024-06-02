@@ -16,7 +16,7 @@ const removeTrailingSlash = url => {
   return url;
 };
 
-const fetchFeedSuggestions = async (inputUrl, signal) => {
+const fetchFeedLinks = async (inputUrl, signal) => {
   let url = inputUrl;
 
   // Ensure the URL has the correct protocol
@@ -164,4 +164,4 @@ const fetchFeedSuggestions = async (inputUrl, signal) => {
   return suggestions;
 };
 
-export default fetchFeedSuggestions;
+export default fetchFeedLinks;

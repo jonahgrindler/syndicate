@@ -12,13 +12,20 @@ import {
   FlatList,
   Alert,
   ActivityIndicator,
+  ScrollView,
+  SectionList,
 } from 'react-native';
 import {RootStackParamList} from '../types/RootStackParamList';
 import {StackNavigationProp} from '@react-navigation/stack';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {colors, fonts, spacing, useTheme} from '../styles/theme';
 import {useFeed} from '../context/FeedContext';
-import fetchFeedSuggestions from './fetchFeedSuggestions';
+import fetchFeedLinks from './fetchFeedLinks';
+import fetchFeedData from './fetchFeedData';
+import CuratedSuggestions from './CuratedSuggestions';
+import FeedSuggestionRow from './FeedSuggestionRow';
+import DashedLine from 'react-native-dashed-line';
+import curatedFeeds from '../data/curatedFeeds';
 
 const debounce = (func, wait) => {
   let timeout;
@@ -32,11 +39,12 @@ const AddFeed: React.FC = () => {
   const navigation =
     useNavigation<StackNavigationProp<RootStackParamList, 'AddFeed'>>();
   const {primaryColor, secondaryColor, highlightColor} = useTheme();
-  const {addNewFeed} = useFeed();
+  const {addNewFeed, feeds} = useFeed();
   const [inputUrl, setInputUrl] = useState('');
   const [suggestions, setSuggestions] = useState([]);
   const [loading, setLoading] = useState(false);
   const [pendingAdd, setPendingAdd] = useState(false);
+  const [parsedCuratedFeeds, setParsedCuratedFeeds] = useState([]);
   const controllerRef = useRef(null);
 
   const fetchSuggestions = async () => {
@@ -48,7 +56,7 @@ const AddFeed: React.FC = () => {
     // const signal = controllerRef.current.signal;
     try {
       const signal = new AbortController().signal;
-      const fetchedSuggestions = await fetchFeedSuggestions(inputUrl, signal);
+      const fetchedSuggestions = await fetchFeedLinks(inputUrl, signal);
       setSuggestions(fetchedSuggestions);
     } catch (error) {
       if (error.name !== 'AbortError') {
@@ -68,24 +76,42 @@ const AddFeed: React.FC = () => {
     debouncedFetchSuggestions(inputUrl);
   }, [inputUrl]);
 
-  // Adding a new Feed
-  const handleAddFeed = async feedUrl => {
-    const fetchFeed = async () => {
-      if (!inputUrl) {
-        console.error('No URL provided');
-        return;
-      }
-      try {
-        setPendingAdd(true);
-        await addNewFeed(feedUrl);
-        // setInputUrl('');
-        navigation.goBack();
-      } catch (error) {
-        console.error('Failed to fetch or parse feeds:', error);
-      }
+  // Curated Feeds
+  useEffect(() => {
+    const fetchCuratedFeeds = async () => {
+      setLoading(true);
+      const parsedFeeds = await Promise.all(
+        curatedFeeds.map(feed => fetchFeedData(feed)),
+      );
+      setParsedCuratedFeeds(parsedFeeds.filter(feed => feed !== null));
+      setLoading(false);
     };
-    fetchFeed();
+    fetchCuratedFeeds();
+  }, []);
+
+  const renderFeedItem = ({item}) => {
+    const isAdded = feeds.some(feed => feed.channel_url === item.url);
+
+    return (
+      <FeedSuggestionRow
+        url={item.url}
+        title={item.custom_title || item.title}
+        icon={item.icon}
+        isAdded={isAdded}
+      />
+    );
   };
+
+  const sections = [
+    {
+      title: 'Search',
+      data: suggestions,
+    },
+    {
+      title: 'Suggestions',
+      data: parsedCuratedFeeds,
+    },
+  ];
 
   return (
     <SafeAreaView
@@ -112,66 +138,40 @@ const AddFeed: React.FC = () => {
         placeholder="Website or feed URL"
         autoCapitalize="none"
       />
-      {loading && (
-        <Text
-          style={[
-            styles.text,
-            styles.loading,
-            {color: primaryColor, textAlign: 'center'},
-          ]}>
-          Loading...
-        </Text>
-      )}
-
-      <FlatList
+      <SectionList
         style={styles.suggestionList}
-        keyboardShouldPersistTaps="always"
-        data={suggestions}
+        sections={sections}
+        stickySectionHeadersEnabled={false}
         keyExtractor={(item, index) => index.toString()}
-        renderItem={({item}) => (
-          <TouchableOpacity
-            onPress={() => handleAddFeed(item.url)}
-            style={styles.suggestion}>
-            <View style={styles.iconTitle}>
-              {item.icon && (
-                <Image source={{uri: item.icon}} style={styles.icon} />
-              )}
-              <View>
+        renderSectionHeader={({section: {title}}) => (
+          <>
+            {title === 'Search' ? null : (
+              <View style={styles.sectionHeader}>
+                <DashedLine
+                  dashLength={3}
+                  dashThickness={3}
+                  dashGap={5}
+                  dashColor={primaryColor}
+                  dashStyle={{borderRadius: 5, marginBottom: 8}}
+                />
                 <Text style={[styles.text, {color: primaryColor}]}>
-                  {item.title || item.url}
-                </Text>
-                <Text style={[styles.textSmall, {color: primaryColor}]}>
-                  {item.url}
+                  {title}
                 </Text>
               </View>
-            </View>
-            <View style={[styles.plusIcon, {borderColor: primaryColor}]}>
-              {pendingAdd ? (
-                <ActivityIndicator size="small" color={primaryColor} />
-              ) : (
-                <Image
-                  source={require('../../assets/icons/plus.png')}
-                  tintColor={primaryColor}
-                />
-              )}
-            </View>
-          </TouchableOpacity>
+            )}
+          </>
         )}
+        renderItem={renderFeedItem}
       />
-      {/* <TouchableOpacity
-        onPress={handleAddFeed}
-        style={[
-          styles.button,
-          {color: primaryColor, borderColor: primaryColor},
-        ]}>
-        <Text style={[styles.buttonText, {color: primaryColor}]}>Add</Text>
-      </TouchableOpacity> */}
     </SafeAreaView>
   );
 };
 const styles = StyleSheet.create({
   safeView: {
     flex: 1,
+  },
+  footerSpace: {
+    height: 120,
   },
   navigation: {
     height: 56,
@@ -204,9 +204,13 @@ const styles = StyleSheet.create({
   loading: {
     marginTop: 12,
   },
+  sectionHeader: {
+    marginTop: 120,
+    marginBottom: 48,
+  },
   suggestionList: {
     paddingTop: 24,
-    marginHorizontal: spacing.leftRightMargin,
+    paddingHorizontal: spacing.leftRightMargin,
     // gap: 40,
   },
   suggestion: {
@@ -215,7 +219,7 @@ const styles = StyleSheet.create({
     gap: 16,
     width: '100%',
     justifyContent: 'space-between',
-    marginBottom: 40,
+    marginBottom: 32,
   },
   iconTitle: {
     flexDirection: 'row',
