@@ -1,4 +1,6 @@
 import * as rssParser from 'react-native-rss-parser';
+import {parseDocument} from 'htmlparser2';
+import {DomUtils} from 'domhandler';
 
 const ensureHttps = url => {
   if (url.startsWith('http://')) {
@@ -45,38 +47,77 @@ const fetchFeedSuggestions = async (inputUrl, signal) => {
         throw new Error(`Network response was not ok: ${response.statusText}`);
       }
       const html = await response.text();
+      const doc = parseDocument(html);
 
-      // Use regex or a DOM parser to find RSS/Atom links if not a direct feed
+      // Use htmlparser2 to find RSS/Atom links if not a direct feed
       const rssLinks = [];
-      const linkRegex =
-        /<link[^>]+rel="alternate"[^>]+type="application\/(rss\+xml|atom\+xml)"[^>]*>/gi;
-      const aTagRegex = /<a[^>]+href="([^"]+\.xml)"[^>]*>.*<\/a>/gi;
 
-      let match;
-      while ((match = linkRegex.exec(html)) !== null) {
-        const hrefMatch = /href="([^"]+)"/.exec(match[0]);
-        if (hrefMatch) {
-          // Resolve relative URLs
-          const feedUrl = ensureHttps(new URL(hrefMatch[1], urlToTry).href);
-          rssLinks.push(removeTrailingSlash(feedUrl));
+      const extractLinks = (element, baseUrl) => {
+        if (
+          element.name === 'link' &&
+          element.attribs.rel === 'alternate' &&
+          (element.attribs.type === 'application/rss+xml' ||
+            element.attribs.type === 'application/atom+xml')
+        ) {
+          const href = element.attribs.href;
+          if (href) {
+            const feedUrl = ensureHttps(new URL(href, baseUrl).href);
+            rssLinks.push(removeTrailingSlash(feedUrl));
+          }
         }
-      }
+        if (
+          element.name === 'a' &&
+          element.attribs.href &&
+          element.attribs.href.endsWith('.xml')
+        ) {
+          const href = element.attribs.href;
+          if (href) {
+            const feedUrl = ensureHttps(new URL(href, baseUrl).href);
+            rssLinks.push(removeTrailingSlash(feedUrl));
+          }
+        }
+        if (element.children && element.children.length > 0) {
+          element.children.forEach(child => extractLinks(child, baseUrl));
+        }
+      };
 
-      while ((match = aTagRegex.exec(html)) !== null) {
-        const hrefMatch = /href="([^"]+\.xml)"/.exec(match[0]);
-        if (hrefMatch) {
-          // Resolve relative URLs
-          const feedUrl = ensureHttps(new URL(hrefMatch[1], urlToTry).href);
-          rssLinks.push(removeTrailingSlash(feedUrl));
-        }
-      }
+      // Start traversing the parsed document
+      doc.children.forEach(element => extractLinks(element, urlToTry));
+      // const linkRegex =
+      //   /<link[^>]+rel="alternate"[^>]+type="application\/(rss\+xml|atom\+xml)"[^>]*>/gi;
+      // const aTagRegex = /<a[^>]+href="([^"]+\.xml)"[^>]*>.*<\/a>/gi;
+
+      // let match;
+      // console.log('Scanning for <link> elements...');
+      // while ((match = linkRegex.exec(html)) !== null) {
+      //   const hrefMatch = /href="([^"]+)"/.exec(match[0]);
+      //   if (hrefMatch) {
+      //     // Resolve relative URLs
+      //     const feedUrl = ensureHttps(new URL(hrefMatch[1], urlToTry).href);
+      //     rssLinks.push(removeTrailingSlash(feedUrl));
+      //     console.log('Found link:', feedUrl);
+      //   }
+      // }
+
+      // console.log('Scanning for <a> elements...');
+      // while ((match = aTagRegex.exec(html)) !== null) {
+      //   const hrefMatch = /href="([^"]+\.xml)"/.exec(match[0]);
+      //   if (hrefMatch) {
+      //     // Resolve relative URLs
+      //     const feedUrl = ensureHttps(new URL(hrefMatch[1], urlToTry).href);
+      //     rssLinks.push(removeTrailingSlash(feedUrl));
+      //     console.log('Found link:', feedUrl);
+      //   }
+      // }
 
       // Fetch feed info for each RSS link
       console.log('rss links', rssLinks);
       const feeds = await Promise.all(
         rssLinks.map(async link => {
           try {
+            console.log('link', link);
             const feedResponse = await fetch(link, {signal});
+            console.log('feedResponse status', feedResponse.status);
             if (!feedResponse.ok) {
               throw new Error(
                 `Network response was not ok: ${feedResponse.statusText}`,

@@ -133,9 +133,9 @@ const AddFeed: React.FC = () => {
             onPress={() => handleAddFeed(item.url)}
             style={styles.suggestion}>
             <View style={styles.iconTitle}>
-              {/* {item.icon && (
+              {item.icon && (
                 <Image source={{uri: item.icon}} style={styles.icon} />
-              )} */}
+              )}
               <View>
                 <Text style={[styles.text, {color: primaryColor}]}>
                   {item.title || item.url}
@@ -207,6 +207,7 @@ const styles = StyleSheet.create({
   suggestionList: {
     paddingTop: 24,
     marginHorizontal: spacing.leftRightMargin,
+    // gap: 40,
   },
   suggestion: {
     flexDirection: 'row',
@@ -214,6 +215,7 @@ const styles = StyleSheet.create({
     gap: 16,
     width: '100%',
     justifyContent: 'space-between',
+    marginBottom: 40,
   },
   iconTitle: {
     flexDirection: 'row',
@@ -230,6 +232,13 @@ const styles = StyleSheet.create({
     fontSize: fonts.size.large,
     fontWeight: fonts.weight.semibold,
     flexShrink: 1,
+    paddingRight: 48,
+  },
+  textSmall: {
+    flex: 0,
+    flexShrink: 1,
+    flexWrap: 'wrap',
+    paddingRight: 48,
   },
   plusIcon: {
     borderWidth: 2,
