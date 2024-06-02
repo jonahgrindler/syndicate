@@ -162,6 +162,7 @@ const AddFeed: React.FC = () => {
           </>
         )}
         renderItem={renderFeedItem}
+        ListFooterComponent={<View style={styles.footerSpace}></View>}
       />
     </SafeAreaView>
   );
@@ -211,7 +212,6 @@ const styles = StyleSheet.create({
   suggestionList: {
     paddingTop: 24,
     paddingHorizontal: spacing.leftRightMargin,
-    // gap: 40,
   },
   suggestion: {
     flexDirection: 'row',
