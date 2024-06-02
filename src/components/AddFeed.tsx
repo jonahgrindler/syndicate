@@ -4,15 +4,11 @@ import React, {useEffect, useState, useRef} from 'react';
 import {
   StyleSheet,
   TextInput,
-  Button,
   View,
   TouchableOpacity,
   Image,
   Text,
-  FlatList,
   Alert,
-  ActivityIndicator,
-  ScrollView,
   SectionList,
 } from 'react-native';
 import {RootStackParamList} from '../types/RootStackParamList';
@@ -22,7 +18,6 @@ import {colors, fonts, spacing, useTheme} from '../styles/theme';
 import {useFeed} from '../context/FeedContext';
 import fetchFeedLinks from './fetchFeedLinks';
 import fetchFeedData from './fetchFeedData';
-import CuratedSuggestions from './CuratedSuggestions';
 import FeedSuggestionRow from './FeedSuggestionRow';
 import DashedLine from 'react-native-dashed-line';
 import curatedFeeds from '../data/curatedFeeds';
@@ -43,7 +38,6 @@ const AddFeed: React.FC = () => {
   const [inputUrl, setInputUrl] = useState('');
   const [suggestions, setSuggestions] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [pendingAdd, setPendingAdd] = useState(false);
   const [parsedCuratedFeeds, setParsedCuratedFeeds] = useState([]);
   const controllerRef = useRef(null);
 
@@ -70,7 +64,7 @@ const AddFeed: React.FC = () => {
     setLoading(false);
   };
 
-  const debouncedFetchSuggestions = debounce(fetchSuggestions, 10);
+  const debouncedFetchSuggestions = debounce(fetchSuggestions, 10); // may be clearing search results
 
   useEffect(() => {
     debouncedFetchSuggestions(inputUrl);

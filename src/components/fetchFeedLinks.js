@@ -83,32 +83,6 @@ const fetchFeedLinks = async (inputUrl, signal) => {
 
       // Start traversing the parsed document
       doc.children.forEach(element => extractLinks(element, urlToTry));
-      // const linkRegex =
-      //   /<link[^>]+rel="alternate"[^>]+type="application\/(rss\+xml|atom\+xml)"[^>]*>/gi;
-      // const aTagRegex = /<a[^>]+href="([^"]+\.xml)"[^>]*>.*<\/a>/gi;
-
-      // let match;
-      // console.log('Scanning for <link> elements...');
-      // while ((match = linkRegex.exec(html)) !== null) {
-      //   const hrefMatch = /href="([^"]+)"/.exec(match[0]);
-      //   if (hrefMatch) {
-      //     // Resolve relative URLs
-      //     const feedUrl = ensureHttps(new URL(hrefMatch[1], urlToTry).href);
-      //     rssLinks.push(removeTrailingSlash(feedUrl));
-      //     console.log('Found link:', feedUrl);
-      //   }
-      // }
-
-      // console.log('Scanning for <a> elements...');
-      // while ((match = aTagRegex.exec(html)) !== null) {
-      //   const hrefMatch = /href="([^"]+\.xml)"/.exec(match[0]);
-      //   if (hrefMatch) {
-      //     // Resolve relative URLs
-      //     const feedUrl = ensureHttps(new URL(hrefMatch[1], urlToTry).href);
-      //     rssLinks.push(removeTrailingSlash(feedUrl));
-      //     console.log('Found link:', feedUrl);
-      //   }
-      // }
 
       // Fetch feed info for each RSS link
       console.log('rss links', rssLinks);

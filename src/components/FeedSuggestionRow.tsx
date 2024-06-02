@@ -1,36 +1,24 @@
 import {useNavigation} from '@react-navigation/native';
-import React, {useEffect, useState, useRef} from 'react';
+import React, {useState} from 'react';
 import {
   StyleSheet,
-  TextInput,
-  Button,
   View,
   TouchableOpacity,
   Image,
   Text,
-  FlatList,
-  Alert,
   ActivityIndicator,
 } from 'react-native';
 import {RootStackParamList} from '../types/RootStackParamList';
 import {StackNavigationProp} from '@react-navigation/stack';
-import {SafeAreaView} from 'react-native-safe-area-context';
 import {colors, fonts, spacing, useTheme} from '../styles/theme';
 import {useFeed} from '../context/FeedContext';
-import fetchFeedLinks from './fetchFeedLinks';
 import allColors from '../data/allColors';
 
 const FeedSuggestionRow: React.FC = ({url, title, icon, isAdded}) => {
-  console.log('Feed Row:', url);
-
-  const navigation =
-    useNavigation<StackNavigationProp<RootStackParamList, 'AddFeed'>>();
   const {primaryColor, secondaryColor, highlightColor} = useTheme();
   const {addNewFeed} = useFeed();
-  const [loading, setLoading] = useState(false);
   const [added, setAdded] = useState(false);
   const [pendingAdd, setPendingAdd] = useState(false);
-  const controllerRef = useRef(null);
 
   // Adding a new Feed
   const handleAddFeed = async feedUrl => {
@@ -38,7 +26,6 @@ const FeedSuggestionRow: React.FC = ({url, title, icon, isAdded}) => {
       try {
         setPendingAdd(true);
         await addNewFeed(feedUrl);
-        // setInputUrl('');
         // navigation.goBack();
         setPendingAdd(false);
         setAdded(true);
@@ -60,8 +47,7 @@ const FeedSuggestionRow: React.FC = ({url, title, icon, isAdded}) => {
         {icon ? (
           <Image source={{uri: icon}} style={[styles.icon]} />
         ) : (
-          <View
-            style={[styles.icon, {backgroundColor: pickRandomColor()}]}></View>
+          <View style={[styles.icon, {backgroundColor: pickRandomColor()}]} />
         )}
         <View>
           <Text style={[styles.text, {color: primaryColor}]}>
@@ -117,7 +103,7 @@ const styles = StyleSheet.create({
   },
   text: {
     fontSize: fonts.size.large,
-    fontWeight: fonts.weight.semibold,
+    fontWeight: fonts.weight.semibold, // causing prettier error
     flexShrink: 1,
     paddingRight: 48,
   },
@@ -134,20 +120,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     width: 32,
     height: 32,
-  },
-  buttonText: {
-    fontSize: fonts.size.large,
-    fontWeight: fonts.weight.semibold,
-  },
-  button: {
-    color: colors.dark.primary,
-    width: 'auto',
-    marginHorizontal: spacing.leftRightMargin,
-    height: 48,
-    borderWidth: 2,
-    borderRadius: 40,
-    alignItems: 'center',
-    justifyContent: 'center',
   },
 });
 
