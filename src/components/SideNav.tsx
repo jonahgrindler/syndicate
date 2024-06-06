@@ -17,20 +17,26 @@ import ResetDatabase from './ResetDatabase';
 import ThemePicker from './ThemePicker';
 import {useTheme} from '../styles/theme';
 import ChannelMenu from './ChannelMenu';
+import DashedLine from 'react-native-dashed-line';
 import NavRow from './NavRow';
 import NavButton from './NavButton';
+import FolderNavItem from './FolderNavItem';
 
 const SideNav: React.FC = ({feedContent}) => {
   const {
     feedData,
-    visibleFeeds,
-    toggleFeedVisibility,
+    feeds,
+    folders,
+    folderFeeds,
+    posts,
     refreshFeeds,
-    handleOpenFeed,
-    allPosts,
-    savedPosts,
-    handleDelete,
-    loading,
+    isFolderView,
+    currentFolder,
+    selectedFolderTitle,
+    handleBackFromFolder,
+    handleGetFeedsInFolder,
+    handleSelectedFeedId,
+    handleSelectFolder,
   } = useFeed();
   const {primaryColor, secondaryColor, highlightColor} = useTheme();
   const [refreshing, setRefreshing] = useState(false);
@@ -42,8 +48,19 @@ const SideNav: React.FC = ({feedContent}) => {
     setRefreshing(false);
   };
 
+  console.log('folderFeeds', folderFeeds);
+
+  // TODO : Show loading indicator when opening the app
+  // TODO : Cache nav items and posts from last session
   return (
-    <View style={[styles.safeAreaView, {backgroundColor: secondaryColor}]}>
+    <View
+      style={[
+        styles.safeAreaView,
+        posts
+          ? {backgroundColor: secondaryColor}
+          : {backgroundColor: secondaryColor},
+        // TODO : Change sideNav width when nothing is selected or user swipes toward right
+      ]}>
       <ScrollView
         style={[{paddingTop: insets.top + 4, paddingLeft: insets.left}]}
         refreshControl={
@@ -53,40 +70,90 @@ const SideNav: React.FC = ({feedContent}) => {
             tintColor={primaryColor}
           />
         }>
-        <NavRow
-          title={'Everything'}
-          selected={true}
-          newCount={0}
-          feedId={'everything'}
-        />
-        <NavRow
-          title={'Saved'}
-          selected={false}
-          newCount={0}
-          feedId={'saved'}
-        />
-
-        {feedData.map(feed => (
-          <View key={feed.id} style={styles.channel}>
-            <NavRow
-              title={feed.custom_title ? feed.custom_title : feed.title}
-              selected={false}
-              newCount={feed.unseenCount}
-              feedId={feed.id}
-            />
+        {isFolderView ? (
+          // SECTION: FOLDER CONTENTS
+          <View style={styles.folderViewHeader}>
+            <TouchableOpacity
+              onPress={handleBackFromFolder}
+              style={styles.back}>
+              <Image
+                source={require('../../assets/icons/chevron-left.png')}
+                tintColor={primaryColor}
+              />
+              <Image
+                source={require('../../assets/icons/folder.png')}
+                tintColor={primaryColor}
+              />
+              <Text style={[styles.text, {color: primaryColor}]}>
+                {selectedFolderTitle}
+              </Text>
+            </TouchableOpacity>
+            <>
+              <NavRow
+                title={'All'}
+                selected={false}
+                newCount={0}
+                // feedId={'folder-all'}
+              />
+              {folderFeeds.map(feed => (
+                <View key={feed.id} style={styles.channel}>
+                  <NavRow
+                    title={feed.custom_title ? feed.custom_title : feed.title}
+                    selected={false}
+                    newCount={feed.unseenCount}
+                    feedId={feed.id}
+                    // isFolder={feed.isFolder}
+                  />
+                </View>
+              ))}
+            </>
           </View>
-        ))}
+        ) : (
+          // SECTION: MAIN FEED LIST
+          <>
+            <NavRow
+              title={'All'}
+              selected={true}
+              newCount={0}
+              feedId={'everything'}
+            />
+            <NavRow
+              title={'Saves'}
+              selected={false}
+              newCount={0}
+              feedId={'saved'}
+            />
+            <NavRow
+              title={'Settings'}
+              selected={false}
+              newCount={0}
+              feedId={'settings'}
+            />
+            {/* SECTION: FEEDS */}
+            {feeds.map(feed => (
+              <View key={feed.id} style={styles.channel}>
+                <NavRow
+                  title={feed.custom_title ? feed.custom_title : feed.title}
+                  selected={false}
+                  newCount={feed.unseenCount}
+                  feedId={feed.id}
+                  // isFolder={feed.isFolder}
+                />
+              </View>
+            ))}
 
-        <NavRow
-          title={'Settings'}
-          selected={false}
-          newCount={0}
-          feedId={'settings'}
-        />
+            {/* SECTION: FOLDERS */}
+            {folders.map(folder => (
+              <React.Fragment key={folder.id}>
+                <FolderNavItem folder={folder} isFolder={true} />
+              </React.Fragment>
+            ))}
+          </>
+        )}
       </ScrollView>
       <View style={[styles.buttons, {paddingBottom: insets.bottom}]}>
         <NavButton label={'Add'} buttonHeight={106} to={'AddFeed'} />
-        <NavButton label={'Folder'} buttonHeight={36} to={'AddFeed'} />
+        <NavButton label={'Folder'} buttonHeight={36} to={'AddFolder'} />
       </View>
     </View>
   );
@@ -98,10 +165,20 @@ const styles = StyleSheet.create({
     paddingBottom: 8,
     paddingLeft: 6,
     maxWidth: 142,
+    // width: '100%',
     justifyContent: 'space-between',
   },
   buttons: {
     gap: 8,
+  },
+  text: {
+    fontSize: fonts.size.large,
+    fontWeight: fonts.weight.semibold,
+  },
+  back: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 2,
   },
 });
 

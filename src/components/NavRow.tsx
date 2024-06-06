@@ -5,21 +5,42 @@ import {useFeed} from '../context/FeedContext';
 import {trigger} from 'react-native-haptic-feedback';
 import ChannelMenu from './ChannelMenu';
 
-const NavRow: React.FC<any> = ({title, selected, newCount, feedId}) => {
-  const {feedData, handleSelectedFeedId, selectedFeedId, handleDelete} =
-    useFeed();
+const NavRow: React.FC<any> = ({
+  title,
+  selected,
+  newCount,
+  feedId,
+  isFolder,
+}) => {
+  const {
+    feedData,
+    handleSelectedFeedId,
+    selectedFeedId,
+    handleDelete,
+    handleSelectFolder,
+  } = useFeed();
   const {primaryColor, secondaryColor, highlightColor} = useTheme();
   const [isSelected, setIsSelected] = useState(false);
 
   const selectedFeed = feedData.find(feed => feed.id === feedId);
 
   useEffect(() => {
+    // console.log('selectedFeedId', selectedFeedId);
     if (feedId === selectedFeedId) {
       setIsSelected(true);
     } else {
       setIsSelected(false);
     }
   }, [selectedFeedId]);
+
+  // Folders
+  const handlePress = () => {
+    if (isFolder) {
+      handleSelectFolder(feedId);
+    } else {
+      handleSelectedFeedId(feedId);
+    }
+  };
 
   // Haptics
   const options = {
@@ -44,7 +65,7 @@ const NavRow: React.FC<any> = ({title, selected, newCount, feedId}) => {
       <TouchableOpacity
         style={styles.navRow}
         onPressIn={hapticsPressIn}
-        onPress={() => [handleSelectedFeedId(feedId), haptics()]}>
+        onPress={() => [handlePress(), haptics()]}>
         {isSelected ? (
           <View style={[styles.dot, {backgroundColor: primaryColor}]} />
         ) : null}

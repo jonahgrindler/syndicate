@@ -21,6 +21,13 @@ import {
   renameFeed,
   deleteFeed,
   viewFeed,
+  insertFolder,
+  updateFolder,
+  deleteFolder,
+  addFeedToFolder,
+  removeFeedFromFolder,
+  getFeedsInFolder,
+  getAllFolders,
 } from '../database';
 import * as rssParser from 'react-native-rss-parser';
 import {Post} from '../types/FeedTypes';
@@ -52,6 +59,17 @@ const FeedContext = createContext({
   showSettings: {},
   loading: true,
   setLoading: () => {},
+  folders: [],
+  folderFeeds: [],
+  selectedFolderTitle: '',
+  handleCreateFolder: () => {},
+  handleUpdateFolder: () => {},
+  handleDeleteFolder: () => {},
+  handleAddFeedToFolder: () => {},
+  handleRemoveFeedFromFolder: () => {},
+  handleGetFeedsInFolder: () => {},
+  handleSelectFolder: () => {},
+  handleBackFromFolder: () => {},
 });
 
 export const FeedProvider = ({children}) => {
@@ -64,6 +82,11 @@ export const FeedProvider = ({children}) => {
   const [savedPosts, setSavedPosts] = useState<any>([]);
   const [posts, setPosts] = useState([]);
   const [showSettings, setShowSettings] = useState(false);
+  const [folders, setFolders] = useState([]);
+  const [isFolderView, setIsFolderView] = useState(false);
+  const [currentFolder, setCurrentFolder] = useState(null);
+  const [folderFeeds, setFolderFeeds] = useState([]);
+  const [selectedFolderTitle, setSelectedFolderTitle] = useState('');
 
   // Initialize and load feeds
   useEffect(() => {
@@ -74,6 +97,8 @@ export const FeedProvider = ({children}) => {
       await setupSettingsTable(db);
       await initializeDataIfNeeded(db);
       await fetchAndStoreFeeds();
+      const allFolders = await getAllFolders(db);
+      setFolders(allFolders);
       setLoading(false);
     };
     initializeAndLoadFeeds();
@@ -178,6 +203,14 @@ export const FeedProvider = ({children}) => {
   useEffect(() => {
     const loadPosts = async () => {
       const db = await getDBConnection();
+      // console.log('selectedFeedId', selectedFeedId);
+
+      if (!selectedFeedId) {
+        setShowSettings(false);
+        setPosts([]);
+        return;
+      }
+
       if (selectedFeedId === 'saved') {
         console.log('Nav: saved');
         setShowSettings(false);
@@ -193,14 +226,33 @@ export const FeedProvider = ({children}) => {
         setShowSettings(false);
 
         setPosts(allPosts);
-      } else if (selectedFeedId) {
+      } else if (
+        typeof selectedFeedId === 'string' &&
+        selectedFeedId.startsWith('folder-')
+      ) {
+        setShowSettings(false);
+        // Load posts from folder
+        const folderId = selectedFeedId.split('-')[1];
+        console.log('selectedFeedId', selectedFeedId);
+        const newFolderFeeds = await handleGetFeedsInFolder(folderId);
+        console.log('newFolderFeeds', newFolderFeeds);
+        if (newFolderFeeds.length > 0) {
+          const loadFolderPosts = async () => {
+            let allFolderPosts = [];
+            for (const feed of newFolderFeeds) {
+              // TODO : Don't load same feed twice
+              const loadedPosts = await fetchPostsForFeed(db, feed.id);
+              allFolderPosts = allFolderPosts.concat(loadedPosts);
+            }
+            setPosts(allFolderPosts);
+          };
+          loadFolderPosts();
+        }
+      } else {
         // Show a feed
         setShowSettings(false);
         const loadedPosts = await fetchPostsForFeed(db, selectedFeedId);
         setPosts(loadedPosts);
-      } else {
-        setShowSettings(false);
-        setPosts([]);
       }
     };
 
@@ -264,6 +316,68 @@ export const FeedProvider = ({children}) => {
     await refreshFeeds();
   };
 
+  // Folders
+  const handleCreateFolder = async folderName => {
+    const db = await getDBConnection();
+    await insertFolder(db, folderName);
+    const allFolders = await getAllFolders(db);
+    setFolders(allFolders);
+    return folderId;
+  };
+
+  const handleUpdateFolder = async (folderId, newName) => {
+    const db = await getDBConnection();
+    await updateFolder(db, folderId, newName);
+    const allFolders = await getAllFolders(db);
+    setFolders(allFolders);
+  };
+
+  const handleDeleteFolder = async folderId => {
+    const db = await getDBConnection();
+    await deleteFolder(db, folderId);
+    console.log('Deleted Folder:', folderId);
+    const allFolders = await getAllFolders(db);
+    setFolders(allFolders);
+  };
+
+  const handleAddFeedToFolder = async (folderId, feedId) => {
+    const db = await getDBConnection();
+    await addFeedToFolder(db, folderId, feedId);
+    console.log('Added Feed', feedId, 'to Folder', folderId);
+  };
+
+  const handleRemoveFeedFromFolder = async (folderId, feedId) => {
+    const db = await getDBConnection();
+    await removeFeedFromFolder(db, folderId, feedId);
+  };
+
+  useEffect(() => {
+    const fetchFolders = async () => {
+      const db = await getDBConnection();
+      const allFolders = await getAllFolders(db);
+      setFolders(allFolders);
+    };
+
+    fetchFolders();
+  }, []);
+
+  const handleGetFeedsInFolder = async (folderId, folderTitle) => {
+    const db = await getDBConnection();
+    const feedsInFolder = await getFeedsInFolder(db, folderId);
+    setFolderFeeds(feedsInFolder);
+    setSelectedFolderTitle(folderTitle);
+  };
+
+  const handleSelectFolder = folderId => {
+    setIsFolderView(true);
+    setCurrentFolder(folderId);
+  };
+
+  const handleBackFromFolder = () => {
+    setIsFolderView(false);
+    setCurrentFolder(null);
+  };
+
   return (
     <FeedContext.Provider
       value={{
@@ -287,6 +401,19 @@ export const FeedProvider = ({children}) => {
         handleDelete,
         showSettings,
         loading,
+        folders,
+        folderFeeds,
+        selectedFolderTitle,
+        handleCreateFolder,
+        handleUpdateFolder,
+        handleDeleteFolder,
+        handleAddFeedToFolder,
+        handleRemoveFeedFromFolder,
+        handleGetFeedsInFolder,
+        isFolderView,
+        currentFolder,
+        handleSelectFolder,
+        handleBackFromFolder,
       }}>
       {children}
     </FeedContext.Provider>

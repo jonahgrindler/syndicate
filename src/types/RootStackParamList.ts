@@ -12,6 +12,9 @@ export type RootStackParamList = {
   FeedWebView: {url: string; postId: string};
   SavedScreen: undefined;
   SettingsScreen: undefined;
+  Folders: undefined;
+  AddFolder: undefined;
+  SelectFeeds: {folderId: undefined; newFolderName: string};
 };
 
 export type RootStackScreenProps<T extends keyof RootStackParamList> =

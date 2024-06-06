@@ -14,26 +14,36 @@ import {colors, fonts, spacing, useTheme} from '../styles/theme';
 import {useFeed} from '../context/FeedContext';
 import allColors from '../data/allColors';
 
-const FeedSuggestionRow: React.FC = ({url, title, icon, isAdded}) => {
+const FeedSuggestionRow: React.FC = ({
+  url,
+  title,
+  icon,
+  isAdded,
+  forFolder,
+}) => {
   const {primaryColor, secondaryColor, highlightColor} = useTheme();
-  const {addNewFeed} = useFeed();
+  const {addNewFeed, handleAddFeedToFolder} = useFeed();
   const [added, setAdded] = useState(false);
   const [pendingAdd, setPendingAdd] = useState(false);
 
   // Adding a new Feed
   const handleAddFeed = async feedUrl => {
-    const fetchFeed = async () => {
-      try {
-        setPendingAdd(true);
-        await addNewFeed(feedUrl);
-        // navigation.goBack();
-        setPendingAdd(false);
-        setAdded(true);
-      } catch (error) {
-        console.error('Failed to fetch or parse feeds:', error);
-      }
-    };
-    fetchFeed();
+    if (forFolder) {
+      handleAddFeedToFolder(folder.id, item.id);
+    } else {
+      const fetchFeed = async () => {
+        try {
+          setPendingAdd(true);
+          await addNewFeed(feedUrl);
+          // navigation.goBack();
+          setPendingAdd(false);
+          setAdded(true);
+        } catch (error) {
+          console.error('Failed to fetch or parse feeds:', error);
+        }
+      };
+      fetchFeed();
+    }
   };
 
   function pickRandomColor() {

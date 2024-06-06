@@ -10,6 +10,7 @@ import {
   FlatList,
   ScrollView,
 } from 'react-native';
+import {getDBConnection, fetchPostsForFeed} from '../database';
 import {FeedProps, FeedItem} from '../types/FeedTypes';
 import {RootStackParamList} from '../types/RootStackParamList';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
@@ -19,25 +20,20 @@ import {useFeed} from '../context/FeedContext';
 import {useTheme} from '../styles/theme';
 import Settings from './Settings';
 import MenuPost from './MenuPost';
+import formatDate from '../utilities/formatDate';
 
 const SideFeed: React.FC<FeedProps> = () => {
-  const {feedData, feeds, posts, showSettings, selectedFeedId, loadAllPosts} =
-    useFeed();
+  const {
+    feedData,
+    feeds,
+    posts,
+    showSettings,
+    selectedFeedId,
+    loadAllPosts,
+    handleGetFeedsInFolder,
+  } = useFeed();
   const {primaryColor, secondaryColor} = useTheme();
   const insets = useSafeAreaInsets();
-
-  // // Feed Title + Icon
-  // const selectedFeed = feedData.find(feed => feed.id === selectedFeedId);
-  // useEffect(() => {
-  //   console.log('Selected:', selectedFeedId);
-  //   if (selectedFeed) {
-  //     console.log('Title:', selectedFeed.title);
-  //     console.log('Image:', selectedFeed.image);
-  //     // console.log(selectedFeed.posts);
-  //   }
-  // }, [selectedFeedId]);
-
-  // console.log(feedData[selectedFeed]);
 
   const flatListRef = useRef(null);
 
@@ -69,65 +65,88 @@ const SideFeed: React.FC<FeedProps> = () => {
     }
   };
 
+  // Folders
+  const [folderFeeds, setFolderFeeds] = useState([]);
+
+  useEffect(() => {
+    const loadFolderFeeds = async () => {
+      if (selectedFeedId.startsWith('folder-')) {
+        const folderId = selectedFeedId.split('-')[1];
+        const newFolderFeeds = await handleGetFeedsInFolder(folderId);
+        setFolderFeeds(newFolderFeeds);
+      } else {
+        setFolderFeeds([]);
+      }
+    };
+    loadFolderFeeds();
+  }, [selectedFeedId]);
+
+  // Combine posts from all feeds in the folder
+  useEffect(() => {
+    if (folderFeeds.length > 0) {
+      const loadFolderPosts = async () => {
+        const db = await getDBConnection();
+        let allFolderPosts = [];
+        for (const feed of folderFeeds) {
+          const loadedPosts = await fetchPostsForFeed(db, feed.id);
+          allFolderPosts = allFolderPosts.concat(loadedPosts);
+        }
+        // TODO: needs to update the posts list on the feedContext
+        // setPosts doesn't exist within this component
+        setPosts(allFolderPosts);
+      };
+      loadFolderPosts();
+    }
+  }, [folderFeeds]);
+
   // Sort posts by date
   const sortedPosts = posts.sort(
     (a, b) => new Date(b.published) - new Date(a.published),
   );
 
+  // TODO : Improve formatDate.js for more cases
+
   return (
-    <>
-      {/* <ScrollView style={[styles.scrollView, {paddingTop: insets.top + 8}]}>
-        <View style={styles.feedHeading}>
-          {selectedFeed.image ? (
-            <Image source={{uri: selectedFeed.image}} style={styles.favicon} />
-          ) : (
-            <View
-              style={[styles.favicon, {backgroundColor: primaryColor}]}></View>
-          )}
-          <Text style={[styles.feedTitle, {color: primaryColor}]}>
-            {selectedFeed?.title || 'No Title Available'}
-          </Text>
-          <Image
-            source={require('../../assets/icons/ellipsis.png')}
-            style={[styles.chevron, {tintColor: primaryColor}]}
-          />
-        </View> */}
-      <FlatList
-        ref={flatListRef}
-        style={[
-          styles.scrollView,
-          {paddingTop: insets.top + 8, paddingBottom: insets.bottom + 80},
-        ]}
-        data={sortedPosts}
-        keyExtractor={item => item.post_id.toString()}
-        renderItem={({item}) => (
-          <MenuPost postId={item.post_unique_id}>
-            <TouchableOpacity
-              style={styles.postContainer}
-              onPress={() => handleNavigation(item)}>
-              <DashedLine
-                dashLength={3}
-                dashThickness={3}
-                dashGap={5}
-                dashColor={primaryColor}
-                dashStyle={{borderRadius: 5, marginBottom: 8}}
-              />
-              {item.imageUrl ? (
-                <Image source={{uri: item.imageUrl}} style={styles.postImage} />
-              ) : null}
-              <Text style={[styles.postTitle, {color: primaryColor}]}>
-                {item.title}
+    <FlatList
+      ref={flatListRef}
+      style={[
+        styles.scrollView,
+        {paddingTop: insets.top + 8, paddingBottom: insets.bottom + 80},
+      ]}
+      data={sortedPosts}
+      keyExtractor={item => item.post_id.toString()}
+      renderItem={({item}) => (
+        <MenuPost postId={item.post_unique_id}>
+          <TouchableOpacity
+            style={styles.postContainer}
+            onPress={() => handleNavigation(item)}>
+            <DashedLine
+              dashLength={3}
+              dashThickness={3}
+              dashGap={5}
+              dashColor={primaryColor}
+              dashStyle={{borderRadius: 5, marginBottom: 8}}
+            />
+            {item.imageUrl ? (
+              <Image source={{uri: item.imageUrl}} style={styles.postImage} />
+            ) : null}
+            <Text style={[styles.postTitle, {color: primaryColor}]}>
+              {item.title}
+            </Text>
+            {selectedFeedId === 'everything' ? (
+              <Text style={[styles.smallText, {color: primaryColor}]}>
+                {item.custom_title ? item.custom_title : item.feedTitle},{` `}
+                {formatDate(item.published)}
               </Text>
+            ) : (
               <Text style={[styles.smallText, {color: primaryColor}]}>
                 {item.published}
               </Text>
-            </TouchableOpacity>
-          </MenuPost>
-        )}
-      />
-      {showSettings ? <Settings /> : null}
-      {/* </ScrollView> */}
-    </>
+            )}
+          </TouchableOpacity>
+        </MenuPost>
+      )}
+    />
   );
 };
 
@@ -135,6 +154,7 @@ const styles = StyleSheet.create({
   scrollView: {
     flex: 1,
     paddingRight: 8,
+    // width: 0,
   },
   feedHeading: {
     flexDirection: 'column',

@@ -23,6 +23,7 @@ import {colors, fonts, spacing} from '../styles/theme';
 import {useFeed} from '../context/FeedContext';
 import {useTheme} from '../styles/theme';
 import ResetDatabase from './ResetDatabase';
+import allColors from '../data/allColors';
 
 const Settings: React.FC = ({feedContent}) => {
   const {setTheme, primaryColor, secondaryColor, highlightColor} = useTheme();
@@ -43,6 +44,20 @@ const Settings: React.FC = ({feedContent}) => {
   const handleHighlight = color => {
     setNewHighlight(color);
     setTheme(primaryColor, secondaryColor, color);
+  };
+
+  // TODO : Using react DOM, somethings not working
+  function pickRandomColor() {
+    let number = Math.floor(Math.random() * allColors.length);
+    return number;
+  }
+
+  const randomColors = () => {
+    const {primaryColor, secondaryColor} = useTheme();
+
+    setNewPrimary(allColors[pickRandomColor()]);
+    setNewSecondary(allColors[pickRandomColor()]);
+    setTheme(newPrimary, newSecondary, highlightColor);
   };
 
   // const navigation =
@@ -111,6 +126,22 @@ const Settings: React.FC = ({feedContent}) => {
             ]}
           />
         </View>
+        <TouchableOpacity
+          title="Randomize Color"
+          onPress={randomColors}
+          style={[styles.button, {borderColor: primaryColor}]}>
+          <Text style={[styles.buttonText, {color: primaryColor}]}>
+            Randomize colors
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          title="Original Colors"
+          onPress={randomColors}
+          style={[styles.button, {borderColor: primaryColor}]}>
+          <Text style={[styles.buttonText, {color: primaryColor}]}>
+            Original colors
+          </Text>
+        </TouchableOpacity>
       </View>
       <View style={styles.section}>
         <DashedLine
@@ -168,14 +199,19 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     borderWidth: 2,
   },
-  postImage: {
-    width: '100%',
-    height: 160,
-    marginBottom: 8,
-    borderRadius: 1,
-    borderWidth: 3,
-    borderStyle: 'dashed',
-    borderColor: colors.secondary,
+  button: {
+    flex: 1,
+    height: spacing.row,
+    alignItems: 'center',
+    justifyContent: 'center',
+    // margin: spacing.leftRightMargin,
+    marginTop: 16,
+    borderRadius: 24,
+    borderWidth: 2,
+  },
+  buttonText: {
+    fontSize: fonts.size.medium,
+    fontWeight: fonts.weight.bold,
   },
 });
 

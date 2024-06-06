@@ -12,6 +12,9 @@ import {ThemeProvider} from './src/styles/theme';
 import AddFeed from './src/components/AddFeed';
 import SplitHome from './SplitHome';
 import EditFeed from './src/components/EditFeed';
+import FolderManagement from './src/components/FolderManagement';
+import AddFolder from './src/components/AddFolder';
+import SelectFeeds from './src/components/SelectFeeds';
 
 const Stack = createStackNavigator<RootStackParamList>();
 
@@ -28,6 +31,9 @@ function App(): React.JSX.Element {
             <Stack.Screen name="HomeScreen" component={SplitHome} />
             <Stack.Screen name="AddFeed" component={AddFeed} />
             <Stack.Screen name="EditFeed" component={EditFeed} />
+            <Stack.Screen name="Folders" component={FolderManagement} />
+            <Stack.Screen name="AddFolder" component={AddFolder} />
+            <Stack.Screen name="SelectFeeds" component={SelectFeeds} />
             <Stack.Screen
               name="SavedScreen"
               component={Saved}

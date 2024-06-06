@@ -49,9 +49,26 @@ export const createTables = async db => {
       FOREIGN KEY (channel_id) REFERENCES Channels (channel_id)
     );
   `;
+  const queryFolders = `
+    CREATE TABLE IF NOT EXISTS folders (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT UNIQUE
+    );
+  `;
+  const queryFeedFolders = `
+    CREATE TABLE IF NOT EXISTS feed_folders (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      folder_id INTEGER,
+      feed_id INTEGER,
+      FOREIGN KEY (folder_id) REFERENCES folders (id),
+      FOREIGN KEY (feed_id) REFERENCES feeds (id)
+    );
+  `;
 
   await db.executeSql(queryFeeds);
   await db.executeSql(queryPosts);
+  await db.executeSql(queryFolders);
+  await db.executeSql(queryFeedFolders);
 };
 
 // Setup default feeds
@@ -460,6 +477,69 @@ export const deleteFeed = async (db, feedId) => {
   }
 };
 
+// Folders
+export const insertFolder = async (db, folderName) => {
+  const insertQuery = 'INSERT INTO folders (name) VALUES (?);';
+  try {
+    const result = await db.executeSql(insertQuery, [folderName]);
+    return result[0].insertId; // Return the last inserted ID
+  } catch (error) {
+    if (error.code === 6) {
+      throw new Error('A folder with this name already exists.');
+    }
+    throw error;
+  }
+};
+
+export const createFolder = async folderName => {
+  const db = await getDBConnection();
+  const folderId = await insertFolder(db, folderName);
+  return folderId;
+};
+
+export const updateFolder = async (db, folderId, newName) => {
+  const updateQuery = `UPDATE folders SET name = ? WHERE id = ?;`;
+  await db.executeSql(updateQuery, [newName, folderId]);
+};
+
+export const deleteFolder = async (db, folderId) => {
+  const deleteQuery = `DELETE FROM folders WHERE id = ?;`;
+  await db.executeSql(deleteQuery, [folderId]);
+};
+
+export const addFeedToFolder = async (db, folderId, feedId) => {
+  const insertQuery = `INSERT INTO feed_folders (folder_id, feed_id) VALUES (?, ?);`;
+  await db.executeSql(insertQuery, [folderId, feedId]);
+};
+
+export const removeFeedFromFolder = async (db, folderId, feedId) => {
+  const deleteQuery = `DELETE FROM feed_folders WHERE folder_id = ? AND feed_id = ?;`;
+  await db.executeSql(deleteQuery, [folderId, feedId]);
+};
+
+export const getFeedsInFolder = async (db, folderId) => {
+  const query = `
+    SELECT feeds.* FROM feeds
+    JOIN feed_folders ON feeds.id = feed_folders.feed_id
+    WHERE feed_folders.folder_id = ?;
+  `;
+  const results = await db.executeSql(query, [folderId]);
+  const feeds = [];
+  for (let i = 0; i < results[0].rows.length; i++) {
+    feeds.push(results[0].rows.item(i));
+  }
+  return feeds;
+};
+
+export const getAllFolders = async db => {
+  const results = await db.executeSql('SELECT * FROM folders;');
+  const folders = [];
+  for (let i = 0; i < results[0].rows.length; i++) {
+    folders.push(results[0].rows.item(i));
+  }
+  return folders;
+};
+
 // Dev Helpers
 export const deleteDatabase = async () => {
   const path = 'FeedsDB.db'; // The name of your database file
@@ -472,6 +552,8 @@ export const resetDatabaseTables = async db => {
     await db.executeSql('DROP TABLE IF EXISTS posts;');
     await db.executeSql('DROP TABLE IF EXISTS feeds;');
     await db.executeSql('DROP TABLE IF EXISTS settings;');
+    await db.executeSql('DROP TABLE IF EXISTS folders;');
+    await db.executeSql('DROP TABLE IF EXISTS feed_folders;');
 
     // Recreate tables
     await createTables(db); // Assuming this function creates all necessary tables
