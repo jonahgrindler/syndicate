@@ -1,10 +1,10 @@
-import React from 'react';
+import React, {useEffect} from 'react';
+import {initializeDatabase} from './src/database';
 import {NavigationContainer} from '@react-navigation/native';
 import {createStackNavigator} from '@react-navigation/stack';
 import {RootStackParamList} from './src/types/RootStackParamList';
 import FeedWebView from './src/components/FeedWebView';
-import Saved from './Saved';
-import Settings from './Settings';
+import Saved from './src/components/Saved';
 import Home from './Home';
 import ChannelAllPosts from './src/components/ChannelAllPosts';
 import {FeedProvider} from './src/context/FeedContext';
@@ -19,6 +19,12 @@ import SelectFeeds from './src/components/SelectFeeds';
 const Stack = createStackNavigator<RootStackParamList>();
 
 function App(): React.JSX.Element {
+  useEffect(() => {
+    const initDB = async () => {
+      await initializeDatabase();
+    };
+    initDB();
+  }, []);
   return (
     <ThemeProvider>
       <FeedProvider>
@@ -46,13 +52,6 @@ function App(): React.JSX.Element {
               component={ChannelAllPosts}
               options={{
                 title: 'Channel',
-              }}
-            />
-            <Stack.Screen
-              name="SettingsScreen"
-              component={Settings}
-              options={{
-                title: 'Settings',
               }}
             />
             <Stack.Screen

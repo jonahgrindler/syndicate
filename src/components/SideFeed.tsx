@@ -25,6 +25,7 @@ import formatDate from '../utilities/formatDate';
 const SideFeed: React.FC<FeedProps> = () => {
   const {
     feedData,
+    allFolderPosts,
     feeds,
     posts,
     showSettings,
@@ -100,6 +101,13 @@ const SideFeed: React.FC<FeedProps> = () => {
   }, [folderFeeds]);
 
   // Sort posts by date
+  console.log('selectedFeedId', selectedFeedId);
+  // const sortedPosts = selectedFeedId?.endsWith('-all')
+  //   ? allFolderPosts.sort(
+  //       (a, b) => new Date(b.published) - new Date(a.published),
+  //     )
+  //   : posts.sort((a, b) => new Date(b.published) - new Date(a.published));
+
   const sortedPosts = posts.sort(
     (a, b) => new Date(b.published) - new Date(a.published),
   );

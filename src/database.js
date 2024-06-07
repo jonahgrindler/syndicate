@@ -4,7 +4,7 @@ import * as rssParser from 'react-native-rss-parser';
 SQLite.enablePromise(true);
 
 const feedsDB = 'FeedsDB.db';
-const databaseVersion = '1.0';
+const databaseVersion = '1.1';
 const databaseDisplayName = 'SQLite Feeds Database';
 const databaseSize = 200000; // ~200MB
 
@@ -64,11 +64,18 @@ export const createTables = async db => {
       FOREIGN KEY (feed_id) REFERENCES feeds (id)
     );
   `;
+  const queryMigrationsTable = `
+    CREATE TABLE IF NOT EXISTS migrations (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      version INTEGER NOT NULL
+    );
+  `;
 
   await db.executeSql(queryFeeds);
   await db.executeSql(queryPosts);
   await db.executeSql(queryFolders);
   await db.executeSql(queryFeedFolders);
+  await db.executeSql(queryMigrationsTable);
 };
 
 // Setup default feeds
@@ -115,25 +122,14 @@ export const setupDefaultFeeds = async (db, userId) => {
   }
 };
 
-export const setupSettingsTable = async db => {
-  await db.executeSql(`
-      CREATE TABLE IF NOT EXISTS settings (
-          key TEXT PRIMARY KEY NOT NULL,
-          value TEXT NOT NULL
-      );
-  `);
-
-  // Check if initialized
-  const result = await db.executeSql(
-    `SELECT value FROM settings WHERE key = 'initialized';`,
-  );
-  if (result[0].rows.length === 0) {
-    // Assume app is not initialized
-    await db.executeSql(`INSERT INTO settings (key, value) VALUES (?, ?);`, [
-      'initialized',
-      'false',
-    ]);
-  }
+export const createSettingsTable = async db => {
+  const querySettings = `
+    CREATE TABLE IF NOT EXISTS settings (
+      key TEXT PRIMARY KEY NOT NULL,
+      value TEXT NOT NULL
+    );
+  `;
+  await db.executeSql(querySettings);
 };
 
 export const initializeDataIfNeeded = async db => {
@@ -155,8 +151,31 @@ export const initializeDatabase = async db => {
   // const db = await getDBConnection();
   console.log(db);
   await createTables(db);
-  await setupSettingsTable(db);
+  await createSettingsTable(db);
   await initializeDataIfNeeded(db);
+};
+
+export const saveSetting = async (key, value) => {
+  const db = await getDBConnection();
+  await createSettingsTable(db);
+  await db.executeSql(
+    'INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?);',
+    [key, value],
+  );
+};
+
+export const getSetting = async key => {
+  const db = await getDBConnection();
+  await createSettingsTable(db);
+  const results = await db.executeSql(
+    'SELECT value FROM settings WHERE key = ?;',
+    [key],
+  );
+  if (results[0].rows.length > 0) {
+    return results[0].rows.item(0).value;
+  } else {
+    return null;
+  }
 };
 
 export const parseFeed = async url => {
@@ -564,3 +583,91 @@ export const resetDatabaseTables = async db => {
     throw error;
   }
 };
+
+const migrations = {
+  1: async db => {
+    // Migration for version 1
+    await db.executeSql(`
+      CREATE TABLE IF NOT EXISTS feeds (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        channel_url TEXT UNIQUE,
+        title TEXT,
+        custom_title TEXT,
+        image TEXT,
+        show_in_everything INTEGER DEFAULT 1
+      );
+    `);
+    await db.executeSql(`
+      CREATE TABLE IF NOT EXISTS posts (
+        post_id INTEGER PRIMARY KEY AUTOINCREMENT, 
+        channel_id INTEGER, 
+        title TEXT,
+        link TEXT,
+        description TEXT, 
+        published DATE, 
+        imageUrl TEXT, 
+        post_unique_id TEXT UNIQUE,
+        is_saved BOOLEAN DEFAULT 0,
+        unseen BOOLEAN DEFAULT 1,
+        FOREIGN KEY (channel_id) REFERENCES feeds (id)
+      );
+    `);
+    await db.executeSql(`
+      CREATE TABLE IF NOT EXISTS folders (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT UNIQUE
+      );
+    `);
+    await db.executeSql(`
+      CREATE TABLE IF NOT EXISTS feed_folders (
+        folder_id INTEGER,
+        feed_id INTEGER,
+        FOREIGN KEY (folder_id) REFERENCES folders (id),
+        FOREIGN KEY (feed_id) REFERENCES feeds (id),
+        PRIMARY KEY (folder_id, feed_id)
+      );
+    `);
+  },
+  2: async db => {
+    // Migration for version 2
+    await db.executeSql(`
+      ALTER TABLE feeds ADD COLUMN new_field TEXT DEFAULT '';
+    `);
+    // Add more fields or modify tables as needed
+  },
+  // Add more migrations here for future versions
+};
+
+const getCurrentVersion = async db => {
+  const result = await db.executeSql(`
+    SELECT MAX(version) as version FROM migrations;
+  `);
+  return result[0].rows.item(0).version || 0;
+};
+
+const setCurrentVersion = async (db, version) => {
+  await db.executeSql(
+    `
+    INSERT INTO migrations (version) VALUES (?);
+  `,
+    [version],
+  );
+};
+
+// export const initializeDatabase = async () => {
+//   const db = await getDBConnection();
+//   await createMigrationsTable(db);
+
+//   const currentVersion = await getCurrentVersion(db);
+
+//   for (
+//     let version = currentVersion + 1;
+//     version <= databaseVersion;
+//     version++
+//   ) {
+//     if (migrations[version]) {
+//       await migrations[version](db);
+//       await setCurrentVersion(db, version);
+//     }
+//   }
+// };

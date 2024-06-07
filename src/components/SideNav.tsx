@@ -48,8 +48,6 @@ const SideNav: React.FC = ({feedContent}) => {
     setRefreshing(false);
   };
 
-  console.log('folderFeeds', folderFeeds);
-
   // TODO : Show loading indicator when opening the app
   // TODO : Cache nav items and posts from last session
   return (
@@ -68,6 +66,7 @@ const SideNav: React.FC = ({feedContent}) => {
             refreshing={refreshing}
             onRefresh={onRefresh}
             tintColor={primaryColor}
+            progressViewOffset={insets.top}
           />
         }>
         {isFolderView ? (
@@ -89,12 +88,12 @@ const SideNav: React.FC = ({feedContent}) => {
               </Text>
             </TouchableOpacity>
             <>
-              <NavRow
+              {/* <NavRow
                 title={'All'}
                 selected={false}
                 newCount={0}
-                // feedId={'folder-all'}
-              />
+                feedId={'folder-all'}
+              /> */}
               {folderFeeds.map(feed => (
                 <View key={feed.id} style={styles.channel}>
                   <NavRow

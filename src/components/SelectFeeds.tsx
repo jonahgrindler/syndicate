@@ -22,7 +22,7 @@ const SelectFeeds = () => {
   const route = useRoute();
   const {folderId, newFolderName} = route.params;
   console.log('folderId', folderId);
-  const {feeds, handleAddFeedToFolder} = useFeed();
+  const {feeds, handleAddFeedToFolder, handleGetFeedsInFolder} = useFeed();
   const [selectedFeeds, setSelectedFeeds] = useState([]);
   const {primaryColor, secondaryColor, highlightColor} = useTheme();
 
@@ -43,6 +43,7 @@ const SelectFeeds = () => {
       selectedFeeds.map(feedId => handleAddFeedToFolder(folderId, feedId)),
     );
     console.log('Selected Feeds Added to folder:', selectedFeeds);
+    await handleGetFeedsInFolder(folderId);
     navigation.navigate('HomeScreen');
   };
 

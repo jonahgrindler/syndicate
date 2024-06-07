@@ -47,17 +47,30 @@ const Settings: React.FC = ({feedContent}) => {
   };
 
   // TODO : Using react DOM, somethings not working
-  function pickRandomColor() {
+  const pickRandomColor = () => {
     let number = Math.floor(Math.random() * allColors.length);
     return number;
-  }
+  };
 
   const randomColors = () => {
-    const {primaryColor, secondaryColor} = useTheme();
+    const newPrimaryColor = allColors[pickRandomColor()];
+    const newSecondaryColor = allColors[pickRandomColor()];
 
-    setNewPrimary(allColors[pickRandomColor()]);
-    setNewSecondary(allColors[pickRandomColor()]);
-    setTheme(newPrimary, newSecondary, highlightColor);
+    setNewPrimary(newPrimaryColor);
+    setNewSecondary(newSecondaryColor);
+
+    setTheme(newPrimaryColor, newSecondaryColor, highlightColor);
+  };
+  const originalColors = () => {
+    const newPrimaryColor = '#54D6FD';
+    const newSecondaryColor = '#323232';
+    const newHighlightColor = '#ffffff';
+
+    setNewPrimary(newPrimaryColor);
+    setNewSecondary(newSecondaryColor);
+    setNewHighlight(newHighlightColor);
+
+    setTheme(newPrimaryColor, newSecondaryColor, newHighlightColor);
   };
 
   // const navigation =
@@ -127,19 +140,17 @@ const Settings: React.FC = ({feedContent}) => {
           />
         </View>
         <TouchableOpacity
-          title="Randomize Color"
           onPress={randomColors}
           style={[styles.button, {borderColor: primaryColor}]}>
           <Text style={[styles.buttonText, {color: primaryColor}]}>
-            Randomize colors
+            Random Colors
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
-          title="Original Colors"
-          onPress={randomColors}
+          onPress={originalColors}
           style={[styles.button, {borderColor: primaryColor}]}>
           <Text style={[styles.buttonText, {color: primaryColor}]}>
-            Original colors
+            Default Colors
           </Text>
         </TouchableOpacity>
       </View>

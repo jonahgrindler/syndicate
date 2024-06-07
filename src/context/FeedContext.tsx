@@ -2,7 +2,9 @@ import React, {createContext, useContext, useState, useEffect} from 'react';
 import {
   getDBConnection,
   createTables,
-  setupSettingsTable,
+  createSettingsTable,
+  getSetting,
+  saveSetting,
   initializeDataIfNeeded,
   getFeeds,
   insertPost,
@@ -31,11 +33,13 @@ import {
 } from '../database';
 import * as rssParser from 'react-native-rss-parser';
 import {Post} from '../types/FeedTypes';
+import {saveData} from '../utilities/asyncHelper';
 
 const FeedContext = createContext({
   feeds: [],
   feedData: [],
   selectedFeedId: [],
+  setSelectedFeedId: () => {},
   visibleFeeds: {},
   toggleFeedVisibility: () => {},
   handleOpenFeed: () => {},
@@ -59,6 +63,7 @@ const FeedContext = createContext({
   showSettings: {},
   loading: true,
   setLoading: () => {},
+  // Folders
   folders: [],
   folderFeeds: [],
   selectedFolderTitle: '',
@@ -70,6 +75,7 @@ const FeedContext = createContext({
   handleGetFeedsInFolder: () => {},
   handleSelectFolder: () => {},
   handleBackFromFolder: () => {},
+  allFolderPosts: [],
 });
 
 export const FeedProvider = ({children}) => {
@@ -86,6 +92,7 @@ export const FeedProvider = ({children}) => {
   const [isFolderView, setIsFolderView] = useState(false);
   const [currentFolder, setCurrentFolder] = useState(null);
   const [folderFeeds, setFolderFeeds] = useState([]);
+  const [allFolderPosts, setAllFolderPosts] = useState([]);
   const [selectedFolderTitle, setSelectedFolderTitle] = useState('');
 
   // Initialize and load feeds
@@ -161,6 +168,9 @@ export const FeedProvider = ({children}) => {
     setVisibleFeeds(visibility);
 
     setLoading(false);
+
+    // Async Storage
+    // await saveData('feedData', feedsWithPosts);
   };
 
   const toggleFeedVisibility = id => {
@@ -344,6 +354,7 @@ export const FeedProvider = ({children}) => {
     const db = await getDBConnection();
     await addFeedToFolder(db, folderId, feedId);
     console.log('Added Feed', feedId, 'to Folder', folderId);
+    fetchFolders();
   };
 
   const handleRemoveFeedFromFolder = async (folderId, feedId) => {
@@ -351,26 +362,42 @@ export const FeedProvider = ({children}) => {
     await removeFeedFromFolder(db, folderId, feedId);
   };
 
-  useEffect(() => {
-    const fetchFolders = async () => {
-      const db = await getDBConnection();
-      const allFolders = await getAllFolders(db);
-      setFolders(allFolders);
-    };
+  const fetchFolders = async () => {
+    const db = await getDBConnection();
+    const allFolders = await getAllFolders(db);
+    setFolders(allFolders);
+  };
 
+  useEffect(() => {
     fetchFolders();
   }, []);
 
   const handleGetFeedsInFolder = async (folderId, folderTitle) => {
     const db = await getDBConnection();
-    const feedsInFolder = await getFeedsInFolder(db, folderId);
-    setFolderFeeds(feedsInFolder);
+    const feeds = await getFeedsInFolder(db, folderId);
+    setFolderFeeds(feeds);
     setSelectedFolderTitle(folderTitle);
+
+    let posts = [];
+    for (const feed of feeds) {
+      const feedPosts = await fetchPostsForFeed(db, feed.id);
+      posts = posts.concat(feedPosts);
+    }
+    posts.sort((a, b) => new Date(b.published) - new Date(a.published));
+    setAllFolderPosts(posts);
   };
+
+  // const handleGetFeedsInFolder = async (folderId, folderTitle) => {
+  //   const db = await getDBConnection();
+  //   const feedsInFolder = await getFeedsInFolder(db, folderId);
+  //   setFolderFeeds(feedsInFolder);
+  //   setSelectedFolderTitle(folderTitle);
+  // };
 
   const handleSelectFolder = folderId => {
     setIsFolderView(true);
     setCurrentFolder(folderId);
+    setSelectedFeedId();
   };
 
   const handleBackFromFolder = () => {
@@ -384,6 +411,7 @@ export const FeedProvider = ({children}) => {
         feeds,
         feedData,
         selectedFeedId,
+        setSelectedFeedId,
         handleSelectedFeedId,
         posts,
         visibleFeeds,
@@ -401,8 +429,11 @@ export const FeedProvider = ({children}) => {
         handleDelete,
         showSettings,
         loading,
+        // Folders
         folders,
         folderFeeds,
+        allFolderPosts,
+        setSelectedFeedId,
         selectedFolderTitle,
         handleCreateFolder,
         handleUpdateFolder,

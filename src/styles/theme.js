@@ -1,4 +1,5 @@
-import React, {createContext, useContext, useState} from 'react';
+import React, {createContext, useContext, useState, useEffect} from 'react';
+import {getSetting, saveSetting} from '../database';
 
 const ThemeContext = createContext({
   primaryColor: '#54D6FD', // Default primary color
@@ -16,7 +17,23 @@ export const ThemeProvider = ({children}) => {
 
   const handleSetTheme = (primaryColor, secondaryColor, highlightColor) => {
     setTheme({primaryColor, secondaryColor, highlightColor});
+    saveSetting('primaryColor', primaryColor);
+    saveSetting('secondaryColor', secondaryColor);
+    saveSetting('highlightColor', highlightColor);
   };
+
+  useEffect(() => {
+    const loadColorPalette = async () => {
+      const primaryColor = await getSetting('primaryColor');
+      const secondaryColor = await getSetting('secondaryColor');
+      const highlightColor = await getSetting('highlightColor');
+      if (primaryColor && secondaryColor) {
+        handleSetTheme(primaryColor, secondaryColor, highlightColor);
+      }
+    };
+
+    loadColorPalette();
+  }, []);
 
   return (
     <ThemeContext.Provider value={{...theme, setTheme: handleSetTheme}}>

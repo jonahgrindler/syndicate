@@ -16,6 +16,7 @@ const FolderNavItem: React.FC<any> = ({
     handleSelectedFeedId,
     handleSelectFolder,
     selectedFeedId,
+    setSelectedFeedId,
     handleDeleteFolder,
     handleGetFeedsInFolder,
   } = useFeed();
@@ -24,7 +25,8 @@ const FolderNavItem: React.FC<any> = ({
   const handlePress = async (folderId, folderTitle) => {
     if (isFolder) {
       handleSelectFolder(`folder-${folder.id}`);
-      handleGetFeedsInFolder(folderId, folderTitle);
+      // handleGetFeedsInFolder(folderId, folderTitle);
+      await handleGetFeedsInFolder(folderId, folderTitle);
       // console.log('folder title', folder.name);
     } else {
       handleSelectedFeedId(feedId);
@@ -92,11 +94,7 @@ const FolderNavItem: React.FC<any> = ({
           source={require('../../assets/icons/folder.png')}
           tintColor={primaryColor}
         />
-        <Text
-          style={[
-            styles.navText,
-            selectedFeedId === `folder-${folder.id}` && {color: colors.primary},
-          ]}>
+        <Text style={[styles.navText, {color: primaryColor}]}>
           {folder.name}
         </Text>
       </TouchableOpacity>

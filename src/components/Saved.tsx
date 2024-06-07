@@ -1,6 +1,6 @@
 import React from 'react';
 import {Button, View, StyleSheet, Text} from 'react-native';
-import {RootStackParamList} from './src/types/RootStackParamList';
+import {RootStackParamList} from '../types/RootStackParamList';
 import {StackNavigationProp} from '@react-navigation/stack';
 // import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {useNavigation} from '@react-navigation/native';
