@@ -457,7 +457,7 @@ export const getFeeds = async db => {
   try {
     const feeds = [];
     const results = await db.executeSql(
-      `SELECT id, channel_url, title, custom_title, show_in_everything FROM feeds;`,
+      'SELECT id, channel_url, title, custom_title, show_in_everything, unseen_count FROM feeds;',
     );
     results.forEach(result => {
       for (let index = 0; index < result.rows.length; index++) {
@@ -576,7 +576,7 @@ export const resetDatabaseTables = async db => {
 
     // Recreate tables
     await createTables(db); // Assuming this function creates all necessary tables
-    await setupSettingsTable(db);
+    await createSettingsTable(db);
     console.log('Database has been reset and tables recreated.');
   } catch (error) {
     console.error('Error resetting database:', error);

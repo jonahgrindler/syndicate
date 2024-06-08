@@ -24,6 +24,8 @@ import FolderNavItem from './FolderNavItem';
 
 const SideNav: React.FC = ({feedContent}) => {
   const {
+    loading,
+    setLoading,
     feedData,
     feeds,
     folders,
@@ -134,7 +136,7 @@ const SideNav: React.FC = ({feedContent}) => {
                 <NavRow
                   title={feed.custom_title ? feed.custom_title : feed.title}
                   selected={false}
-                  newCount={feed.unseenCount}
+                  newCount={feed.unseen_count}
                   feedId={feed.id}
                   // isFolder={feed.isFolder}
                 />

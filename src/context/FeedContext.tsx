@@ -79,7 +79,7 @@ const FeedContext = createContext({
 });
 
 export const FeedProvider = ({children}) => {
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState<boolean>(true);
   const [feeds, setFeeds] = useState<any>([]);
   const [feedData, setFeedData] = useState<any>([]);
   const [selectedFeedId, setSelectedFeedId] = useState<any>([]);
@@ -101,7 +101,7 @@ export const FeedProvider = ({children}) => {
       setLoading(true);
       const db = await getDBConnection();
       await createTables(db);
-      await setupSettingsTable(db);
+      await createSettingsTable(db);
       await initializeDataIfNeeded(db);
       await fetchAndStoreFeeds();
       const allFolders = await getAllFolders(db);
@@ -115,13 +115,12 @@ export const FeedProvider = ({children}) => {
     setLoading(true);
     const db = await getDBConnection();
     const feeds = await getFeeds(db);
-    // console.log('feeds:', feeds);
     const feedsWithPosts = [];
 
     for (const feed of feeds) {
       const parsed = await parseFeed(feed.channel_url);
-
       const posts = [];
+
       for (const item of parsed.items) {
         await insertPost(
           db,
@@ -146,6 +145,7 @@ export const FeedProvider = ({children}) => {
       posts.sort((a, b) => new Date(b.published) - new Date(a.published));
 
       const unseenCount = await countNewPosts(db, feed.id);
+      await updateUnseenCount(db, feed.id, unseenCount);
 
       feedsWithPosts.push({
         ...feed,
@@ -153,7 +153,6 @@ export const FeedProvider = ({children}) => {
         posts: posts,
         image: parsed.image?.url,
         unseenCount: unseenCount,
-        // unseenCount: newPostsCount,
       });
     }
 
@@ -243,9 +242,9 @@ export const FeedProvider = ({children}) => {
         setShowSettings(false);
         // Load posts from folder
         const folderId = selectedFeedId.split('-')[1];
-        console.log('selectedFeedId', selectedFeedId);
+        // console.log('selectedFeedId', selectedFeedId);
         const newFolderFeeds = await handleGetFeedsInFolder(folderId);
-        console.log('newFolderFeeds', newFolderFeeds);
+        // console.log('newFolderFeeds', newFolderFeeds);
         if (newFolderFeeds.length > 0) {
           const loadFolderPosts = async () => {
             let allFolderPosts = [];
