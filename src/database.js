@@ -550,6 +550,20 @@ export const getFeedsInFolder = async (db, folderId) => {
   return feeds;
 };
 
+export const getFeedsNotInFolder = async db => {
+  const results = await db.executeSql(`
+    SELECT feeds.*
+    FROM feeds
+    LEFT JOIN feed_folders ON feeds.id = feed_folders.feed_id
+    WHERE feed_folders.feed_id IS NULL;
+  `);
+  const feeds = [];
+  for (let i = 0; i < results[0].rows.length; i++) {
+    feeds.push(results[0].rows.item(i));
+  }
+  return feeds;
+};
+
 export const getAllFolders = async db => {
   const results = await db.executeSql('SELECT * FROM folders;');
   const folders = [];

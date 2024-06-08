@@ -29,6 +29,7 @@ import {
   addFeedToFolder,
   removeFeedFromFolder,
   getFeedsInFolder,
+  getFeedsNotInFolder,
   getAllFolders,
 } from '../database';
 import * as rssParser from 'react-native-rss-parser';
@@ -114,10 +115,11 @@ export const FeedProvider = ({children}) => {
   const fetchAndStoreFeeds = async () => {
     setLoading(true);
     const db = await getDBConnection();
-    const feeds = await getFeeds(db);
+    // const feeds = await getFeeds(db);
+    const feedsNotInFolder = await getFeedsNotInFolder(db);
     const feedsWithPosts = [];
 
-    for (const feed of feeds) {
+    for (const feed of feedsNotInFolder) {
       const parsed = await parseFeed(feed.channel_url);
       const posts = [];
 
@@ -156,8 +158,8 @@ export const FeedProvider = ({children}) => {
       });
     }
 
-    setFeeds(feeds); // This keeps a record of feed metadata
-    setFeedData(feedsWithPosts); // This sets the data with posts included
+    setFeeds(feedsNotInFolder);
+    setFeedData(feedsWithPosts);
 
     // Initialize visibility state
     const visibility = feeds.reduce((acc, feed) => {
