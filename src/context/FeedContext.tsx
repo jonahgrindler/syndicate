@@ -35,6 +35,7 @@ import {
 import * as rssParser from 'react-native-rss-parser';
 import {Post} from '../types/FeedTypes';
 import {saveData} from '../utilities/asyncHelper';
+import formatDate from '../utilities/formatDate';
 
 const FeedContext = createContext({
   feeds: [],
@@ -124,6 +125,7 @@ export const FeedProvider = ({children}) => {
       const posts = [];
 
       for (const item of parsed.items) {
+        const formattedDate = formatDate(item.published);
         await insertPost(
           db,
           feed.channel_url,
@@ -139,10 +141,12 @@ export const FeedProvider = ({children}) => {
           link: item.link,
           description: item.description,
           published: item.published,
+          formattedDate: formattedDate,
           imageUrl: item.imageUrl,
           post_unique_id: item.uniqueId,
         });
       }
+      console.log('posts', posts);
       // Sort posts by date
       posts.sort((a, b) => new Date(b.published) - new Date(a.published));
 
@@ -338,6 +342,9 @@ export const FeedProvider = ({children}) => {
     console.log('Deleted Folder:', folderId);
     const allFolders = await getAllFolders(db);
     setFolders(allFolders);
+    const allFeeds = await getFeeds(db);
+    setFeeds(allFeeds);
+    await fetchAndStoreFeeds();
   };
 
   const handleAddFeedToFolder = async (folderId, feedId) => {

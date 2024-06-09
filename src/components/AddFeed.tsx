@@ -179,10 +179,10 @@ const styles = StyleSheet.create({
   back: {
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: colors.dark.bgLight,
-    borderRadius: 40,
     flexDirection: 'row',
     gap: 4,
+    height: 56,
+    paddingRight: 40,
   },
   input: {
     height: 48,

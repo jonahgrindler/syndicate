@@ -61,7 +61,7 @@ const SelectFeeds = () => {
   ];
   return (
     <SafeAreaView style={[styles.container, {backgroundColor: secondaryColor}]}>
-      <View style={styles.buttonContainer}>
+      <View style={styles.navigation}>
         <TouchableOpacity
           onPress={() => {
             navigation.goBack();
@@ -156,6 +156,20 @@ const styles = StyleSheet.create({
     fontSize: fonts.size.large,
     flexShrink: 1,
     fontWeight: fonts.weight.semibold,
+  },
+  navigation: {
+    height: 40,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingLeft: spacing.leftRightMargin,
+    paddingRight: spacing.leftRightMargin,
+  },
+  back: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexDirection: 'row',
+    height: 56,
   },
   buttonContainer: {
     flexDirection: 'row',

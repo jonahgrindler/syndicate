@@ -522,6 +522,9 @@ export const updateFolder = async (db, folderId, newName) => {
 };
 
 export const deleteFolder = async (db, folderId) => {
+  await db.executeSql('DELETE FROM feed_folders WHERE folder_id = ?', [
+    folderId,
+  ]);
   const deleteQuery = `DELETE FROM folders WHERE id = ?;`;
   await db.executeSql(deleteQuery, [folderId]);
 };

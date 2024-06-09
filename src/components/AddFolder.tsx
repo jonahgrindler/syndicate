@@ -177,9 +177,9 @@ const styles = StyleSheet.create({
   back: {
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 40,
     flexDirection: 'row',
     gap: 4,
+    height: 56,
   },
   text: {
     fontSize: fonts.size.large,
