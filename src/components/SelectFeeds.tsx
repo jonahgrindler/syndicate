@@ -5,6 +5,7 @@ import {
   Text,
   Button,
   FlatList,
+  SectionList,
   TouchableOpacity,
   StyleSheet,
   Image,
@@ -21,8 +22,13 @@ const SelectFeeds = () => {
     useNavigation<StackNavigationProp<RootStackParamList, 'SelectFeeds'>>();
   const route = useRoute();
   const {folderId, newFolderName} = route.params;
-  console.log('folderId', folderId);
-  const {feeds, handleAddFeedToFolder, handleGetFeedsInFolder} = useFeed();
+  // console.log('folderId', folderId);
+  const {
+    feeds,
+    handleAddFeedToFolder,
+    handleGetFeedsInFolder,
+    selectedFolderTitle,
+  } = useFeed();
   const [selectedFeeds, setSelectedFeeds] = useState([]);
   const {primaryColor, secondaryColor, highlightColor} = useTheme();
 
@@ -47,6 +53,12 @@ const SelectFeeds = () => {
     navigation.navigate('HomeScreen');
   };
 
+  const sections = [
+    {
+      title: 'Suggestions',
+      data: feeds,
+    },
+  ];
   return (
     <SafeAreaView style={[styles.container, {backgroundColor: secondaryColor}]}>
       <View style={styles.buttonContainer}>
@@ -65,16 +77,19 @@ const SelectFeeds = () => {
           <Text style={[styles.text, {color: primaryColor}]}>Done</Text>
         </TouchableOpacity>
       </View>
-      <View style={styles.folderHeader}>
-        <Image
-          source={require('../../assets/icons/folder.png')}
-          tintColor={primaryColor}
-        />
-        <Text style={[styles.text, {color: primaryColor}]}>
-          {newFolderName}
-        </Text>
-      </View>
+
       <FlatList
+        ListHeaderComponent={
+          <View style={styles.folderHeader}>
+            <Image
+              source={require('../../assets/icons/folder.png')}
+              tintColor={primaryColor}
+            />
+            <Text style={[styles.text, {color: primaryColor}]}>
+              {newFolderName}
+            </Text>
+          </View>
+        }
         data={feeds}
         keyExtractor={item => item.id.toString()}
         renderItem={({item}) => (
@@ -139,6 +154,7 @@ const styles = StyleSheet.create({
   },
   text: {
     fontSize: fonts.size.large,
+    flexShrink: 1,
     fontWeight: fonts.weight.semibold,
   },
   buttonContainer: {

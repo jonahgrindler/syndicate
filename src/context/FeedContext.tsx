@@ -237,29 +237,59 @@ export const FeedProvider = ({children}) => {
         setShowSettings(false);
 
         setPosts(allPosts);
-      } else if (
-        typeof selectedFeedId === 'string' &&
-        selectedFeedId.startsWith('folder-')
-      ) {
-        setShowSettings(false);
-        // Load posts from folder
-        const folderId = selectedFeedId.split('-')[1];
-        // console.log('selectedFeedId', selectedFeedId);
-        const newFolderFeeds = await handleGetFeedsInFolder(folderId);
-        // console.log('newFolderFeeds', newFolderFeeds);
-        if (newFolderFeeds.length > 0) {
-          const loadFolderPosts = async () => {
-            let allFolderPosts = [];
-            for (const feed of newFolderFeeds) {
-              // TODO : Don't load same feed twice
-              const loadedPosts = await fetchPostsForFeed(db, feed.id);
-              allFolderPosts = allFolderPosts.concat(loadedPosts);
-            }
-            setPosts(allFolderPosts);
-          };
-          loadFolderPosts();
-        }
-      } else {
+      }
+
+      // // WIP ALL FOLDER
+
+      // else if (selectedFeedId.startsWith('all-')) {
+      //   console.log('All selected');
+      //   // Load posts from all feeds in the folder
+      //   const newFolderFeeds = await handleGetFeedsInFolder(
+      //     currentFolder,
+      //     selectedFolderTitle,
+      //   );
+      //   console.log(
+      //     'newFolderFeeds',
+      //     currentFolder,
+      //     selectedFolderTitle,
+      //     newFolderFeeds,
+      //   );
+      //   if (newFolderFeeds.length > 0) {
+      //     let allFolderPosts = [];
+      //     for (const feed of newFolderFeeds) {
+      //       const loadedPosts = await fetchPostsForFeed(db, feed.id);
+      //       allFolderPosts = allFolderPosts.concat(loadedPosts);
+      //     }
+      //     setPosts(allFolderPosts);
+      //   }
+      // }
+
+      // ORIGINAL
+
+      // else if (
+      //   typeof selectedFeedId === 'string' &&
+      //   selectedFeedId.startsWith('folder-')
+      // ) {
+      //   setShowSettings(false);
+      //   // Load posts from folder
+      //   const folderId = selectedFeedId.split('-')[1];
+      //   // console.log('selectedFeedId', selectedFeedId);
+      //   const newFolderFeeds = await handleGetFeedsInFolder(folderId);
+      //   // console.log('newFolderFeeds', newFolderFeeds);
+      //   if (newFolderFeeds.length > 0) {
+      //     const loadFolderPosts = async () => {
+      //       let allFolderPosts = [];
+      //       for (const feed of newFolderFeeds) {
+      //         // TODO : Don't load same feed twice
+      //         const loadedPosts = await fetchPostsForFeed(db, feed.id);
+      //         allFolderPosts = allFolderPosts.concat(loadedPosts);
+      //       }
+      //       setPosts(allFolderPosts);
+      //     };
+      //     loadFolderPosts();
+      //   }
+      // }
+      else {
         // Show a feed
         setShowSettings(false);
         const loadedPosts = await fetchPostsForFeed(db, selectedFeedId);

@@ -21,6 +21,7 @@ import DashedLine from 'react-native-dashed-line';
 import NavRow from './NavRow';
 import NavButton from './NavButton';
 import FolderNavItem from './FolderNavItem';
+import FolderNav from './FolderNav';
 
 const SideNav: React.FC = ({feedContent}) => {
   const {
@@ -90,12 +91,13 @@ const SideNav: React.FC = ({feedContent}) => {
               </Text>
             </TouchableOpacity>
             <>
-              {/* <NavRow
+              {/* <FolderNav folderId={currentFolder} /> */}
+              <NavRow
                 title={'All'}
                 selected={false}
                 newCount={0}
-                feedId={'folder-all'}
-              /> */}
+                feedId={`all-${currentFolder}`}
+              />
               {folderFeeds.map(feed => (
                 <View key={feed.id} style={styles.channel}>
                   <NavRow
@@ -180,6 +182,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 2,
+    marginBottom: fonts.lineHeight.nav,
   },
 });
 

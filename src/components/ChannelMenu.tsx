@@ -51,6 +51,17 @@ const ChannelMenu = ({
       onPressAction={handlePress}
       actions={[
         {
+          id: 'addToFolder',
+          title: 'Add to folder..',
+          attributes: {
+            destructive: false,
+          },
+          image: Platform.select({
+            ios: 'folder',
+            android: 'folder',
+          }),
+        },
+        {
           id: 'rename',
           title: 'Rename Feed',
           attributes: {
@@ -74,6 +85,7 @@ const ChannelMenu = ({
             android: currentShowInEverything ? 'ic_menu_view' : 'ic_menu_view',
           }),
         },
+
         {
           id: 'destructive',
           title: 'Delete Feed',

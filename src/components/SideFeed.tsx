@@ -25,13 +25,15 @@ import formatDate from '../utilities/formatDate';
 const SideFeed: React.FC<FeedProps> = () => {
   const {
     feedData,
-    allFolderPosts,
+    // allFolderPosts,
     feeds,
     posts,
+    setPosts,
     showSettings,
     selectedFeedId,
     loadAllPosts,
     handleGetFeedsInFolder,
+    currentFolder,
   } = useFeed();
   const {primaryColor, secondaryColor} = useTheme();
   const insets = useSafeAreaInsets();
@@ -69,45 +71,54 @@ const SideFeed: React.FC<FeedProps> = () => {
   // Folders
   const [folderFeeds, setFolderFeeds] = useState([]);
 
-  useEffect(() => {
-    const loadFolderFeeds = async () => {
-      if (selectedFeedId.startsWith('folder-')) {
-        const folderId = selectedFeedId.split('-')[1];
-        const newFolderFeeds = await handleGetFeedsInFolder(folderId);
-        setFolderFeeds(newFolderFeeds);
-      } else {
-        setFolderFeeds([]);
-      }
-    };
-    loadFolderFeeds();
-  }, [selectedFeedId]);
+  // useEffect(() => {
+  //   const loadFolderFeeds = async () => {
+  //     if (selectedFeedId.startsWith('folder-')) {
+  //       const folderId = selectedFeedId.split('-')[1];
+  //       if (folderId.startsWith('all-')) {
+  //         // Load posts from all feeds in folder
+  //         const newFolderFeeds = await handleGetFeedsInFolder(folderId);
+  //         console.log('newFolderFeeds', newFolderFeeds);
+  //         if (newFolderFeeds.length > 0) {
+  //           let folderPosts = [];
+  //           for (const feed of newFolderFeeds) {
+  //             const db = await getDBConnection();
+  //             const loadedPosts = await fetchPostsForFeed(db, feed.id);
+  //             folderPosts = folderPosts.concat(loadedPosts);
+  //           }
+  //           setPosts(folderPosts);
+  //         }
+  //       } else {
+  //         // Load individual feed
+  //         const newFolderFeeds = await handleGetFeedsInFolder(folderId);
+  //         setFolderFeeds(newFolderFeeds);
+  //       }
+  //     } else {
+  //       setFolderFeeds([]);
+  //     }
+  //   };
+  //   loadFolderFeeds();
+  // }, [selectedFeedId]);
 
-  // Combine posts from all feeds in the folder
-  useEffect(() => {
-    if (folderFeeds.length > 0) {
-      const loadFolderPosts = async () => {
-        const db = await getDBConnection();
-        let allFolderPosts = [];
-        for (const feed of folderFeeds) {
-          const loadedPosts = await fetchPostsForFeed(db, feed.id);
-          allFolderPosts = allFolderPosts.concat(loadedPosts);
-        }
-        // TODO: needs to update the posts list on the feedContext
-        // setPosts doesn't exist within this component
-        setPosts(allFolderPosts);
-      };
-      loadFolderPosts();
-    }
-  }, [folderFeeds]);
+  // // Combine posts from all feeds in the folder
+  // useEffect(() => {
+  //   if (folderFeeds.length > 0) {
+  //     const loadFolderPosts = async () => {
+  //       const db = await getDBConnection();
+  //       let allFolderPosts = [];
+  //       for (const feed of folderFeeds) {
+  //         const loadedPosts = await fetchPostsForFeed(db, feed.id);
+  //         allFolderPosts = allFolderPosts.concat(loadedPosts);
+  //       }
+  //       // TODO: needs to update the posts list on the feedContext
+  //       // setPosts doesn't exist within this component
+  //       setPosts(allFolderPosts);
+  //     };
+  //     loadFolderPosts();
+  //   }
+  // }, [folderFeeds]);
 
   // Sort posts by date
-  console.log('selectedFeedId', selectedFeedId);
-  // const sortedPosts = selectedFeedId?.endsWith('-all')
-  //   ? allFolderPosts.sort(
-  //       (a, b) => new Date(b.published) - new Date(a.published),
-  //     )
-  //   : posts.sort((a, b) => new Date(b.published) - new Date(a.published));
-
   const sortedPosts = posts.sort(
     (a, b) => new Date(b.published) - new Date(a.published),
   );
