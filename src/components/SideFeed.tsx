@@ -9,6 +9,8 @@ import {
   TouchableOpacity,
   FlatList,
   ScrollView,
+  Linking,
+  Alert,
 } from 'react-native';
 import {getDBConnection, fetchPostsForFeed} from '../database';
 import {FeedProps, FeedItem} from '../types/FeedTypes';
@@ -56,6 +58,8 @@ const SideFeed: React.FC<FeedProps> = () => {
     useNavigation<
       NativeStackNavigationProp<RootStackParamList, 'HomeScreen'>
     >();
+
+  // Open in WebView
   const handleNavigation = (item: FeedItem) => {
     if (item.link) {
       console.log('item link:', item.links);
@@ -68,8 +72,22 @@ const SideFeed: React.FC<FeedProps> = () => {
     }
   };
 
-  // Folders
-  const [folderFeeds, setFolderFeeds] = useState([]);
+  // Open in Default Browser
+  const openInSafari = async url => {
+    try {
+      // Check if the link is valid
+      const supported = await Linking.canOpenURL(url);
+
+      if (supported) {
+        // Open the URL in Safari
+        await Linking.openURL(url);
+      } else {
+        Alert.alert(`Don't know how to open this URL: ${url}`);
+      }
+    } catch (error) {
+      console.error('An error occurred', error);
+    }
+  };
 
   // Sort posts by date
   const sortedPosts = posts.sort(
@@ -91,7 +109,8 @@ const SideFeed: React.FC<FeedProps> = () => {
         <MenuPost postId={item.post_unique_id}>
           <TouchableOpacity
             style={styles.postContainer}
-            onPress={() => handleNavigation(item)}>
+            // onPress={() => handleNavigation(item)}
+            onPress={() => openInSafari(item.link)}>
             <DashedLine
               dashLength={3}
               dashThickness={3}

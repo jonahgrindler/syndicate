@@ -154,6 +154,7 @@ const Settings: React.FC = ({feedContent}) => {
           </Text>
         </TouchableOpacity>
       </View>
+      {/* TODO : Safari options - open in browser or app */}
       <View style={styles.section}>
         <DashedLine
           dashLength={3}
