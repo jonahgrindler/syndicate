@@ -88,12 +88,12 @@ const ChannelMenu = ({
 
         {
           id: 'destructive',
-          title: 'Delete Feed',
+          title: 'Remove Feed',
           attributes: {
             destructive: true,
           },
           image: Platform.select({
-            ios: 'trash',
+            ios: 'minus.circle',
             android: 'ic_menu_delete',
           }),
         },

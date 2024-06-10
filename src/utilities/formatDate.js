@@ -1,4 +1,35 @@
 import {parse, parseISO, isValid, formatDistanceToNow} from 'date-fns';
+import {utcToZonedTime} from 'date-fns-tz';
+
+const timeZones = {
+  PDT: 'America/Los_Angeles',
+  PST: 'America/Los_Angeles',
+  EDT: 'America/New_York',
+  EST: 'America/New_York',
+  CDT: 'America/Chicago',
+  CST: 'America/Chicago',
+  MDT: 'America/Denver',
+  MST: 'America/Denver',
+  // Add other time zones as needed
+};
+
+const parseDateWithTimeZone = (dateString, formatString) => {
+  const tzAbbr = dateString.slice(-3);
+  const timeZone = timeZones[tzAbbr];
+
+  if (!timeZone) {
+    return null;
+  }
+
+  const dateWithoutTz = dateString.slice(0, -4).trim();
+  const parsedDate = parse(dateWithoutTz, formatString, new Date());
+
+  if (isValid(parsedDate)) {
+    return utcToZonedTime(parsedDate, timeZone);
+  }
+
+  return null;
+};
 
 const parseDateString = dateString => {
   const dateFormats = [
@@ -15,6 +46,12 @@ const parseDateString = dateString => {
     if (isValid(parsedDate)) {
       return parsedDate;
     }
+
+    // Try parsing with timezone abbreviations
+    const parsedDateWithTz = parseDateWithTimeZone(dateString, format);
+    if (parsedDateWithTz) {
+      return parsedDateWithTz;
+    }
   }
 
   // Fallback to ISO parsing if all formats fail
@@ -29,11 +66,12 @@ const parseDateString = dateString => {
 const formatDate = dateString => {
   try {
     const date = parseDateString(dateString);
-    // return format(date, 'dd MMM'); // 'PPpp' can be changed to any format you prefer
-    // const date = parseISO(dateString);
+    if (!date) {
+      throw new Error('Invalid date');
+    }
     return formatDistanceToNow(date, {addSuffix: true});
   } catch (error) {
-    console.error('Failed to format date:', error);
+    console.error('Failed to format date:', dateString, error);
     return dateString; // return original date string if parsing fails
   }
 };

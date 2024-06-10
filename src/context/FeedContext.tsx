@@ -133,7 +133,7 @@ export const FeedProvider = ({children}) => {
   };
 
   const fetchAndStoreFeeds = async () => {
-    setLoading(true);
+    // setLoading(true);
     const db = await getDBConnection();
     // const feeds = await getFeeds(db);
     const feedsNotInFolder = await getFeedsNotInFolder(db);
@@ -144,7 +144,7 @@ export const FeedProvider = ({children}) => {
       const posts = [];
 
       for (const item of parsed.items) {
-        const formattedDate = formatDate(item.published);
+        // const formattedDate = formatDate(item.published);
         await insertPost(
           db,
           feed.channel_url,
@@ -160,7 +160,7 @@ export const FeedProvider = ({children}) => {
           link: item.link,
           description: item.description,
           published: item.published,
-          formattedDate: formattedDate,
+          // formattedDate: formattedDate,
           imageUrl: item.imageUrl,
           post_unique_id: item.uniqueId,
         });

@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   View,
   Text,
@@ -50,6 +50,10 @@ const SideNav: React.FC = ({feedContent}) => {
     await refreshFeeds();
     setRefreshing(false);
   };
+  useEffect(() => {
+    console.log('loading..');
+    setRefreshing(loading);
+  }, [loading]);
 
   // TODO : Show loading indicator when opening the app
   // TODO : Cache nav items and posts from last session
