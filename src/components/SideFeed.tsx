@@ -137,7 +137,8 @@ const SideFeed: React.FC<FeedProps> = () => {
               </Text>
             ) : (
               <Text style={[styles.smallText, {color: primaryColor}]}>
-                {formatDate(item.published)}
+                {/* {formatDate(item.published)} */}
+                {item.published}
               </Text>
             )}
           </TouchableOpacity>

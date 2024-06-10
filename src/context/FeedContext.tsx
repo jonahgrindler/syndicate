@@ -103,7 +103,7 @@ export const FeedProvider = ({children}) => {
   // Initialize and load feeds
   useEffect(() => {
     const initializeAndLoadFeeds = async () => {
-      setLoading(true);
+      // setLoading(true);
       const db = await getDBConnection();
       await createTables(db);
       await createSettingsTable(db);

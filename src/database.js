@@ -100,10 +100,6 @@ export const setupDefaultFeeds = async (db, userId) => {
       custom_title: 'hoverstat.es',
     },
     {
-      channel_url: 'https://sidebar.io/feed.xml',
-      custom_title: 'Sidebar',
-    },
-    {
       channel_url: 'https://feeds.feedburner.com/pudding/feed',
       custom_title: 'The Pudding',
     },

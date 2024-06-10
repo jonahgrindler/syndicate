@@ -16,10 +16,6 @@ const curatedFeeds = [
     custom_title: 'hoverstat.es',
   },
   {
-    channel_url: 'https://sidebar.io/feed.xml',
-    custom_title: 'Sidebar',
-  },
-  {
     channel_url: 'https://feeds.feedburner.com/pudding/feed',
     custom_title: 'The Pudding',
   },
@@ -35,10 +31,10 @@ const curatedFeeds = [
     channel_url: 'https://rss.nytimes.com/services/xml/rss/nyt/World.xml',
     custom_title: 'NYT World',
   },
-  {
-    channel_url: 'https://www.siteinspire.com/websites/feed',
-    custom_title: 'Site Inspire',
-  },
+  // {
+  //   channel_url: 'https://www.siteinspire.com/websites/feed',
+  //   custom_title: 'Site Inspire',
+  // },
 ];
 
 export default curatedFeeds;
