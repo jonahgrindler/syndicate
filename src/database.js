@@ -130,6 +130,10 @@ export const createSettingsTable = async db => {
     );
   `;
   await db.executeSql(querySettings);
+  // Add a default setting for link behavior
+  await db.executeSql(`
+    INSERT OR IGNORE INTO settings (key, value) VALUES ('linkBehavior', 'webview');
+  `);
 };
 
 export const initializeDataIfNeeded = async db => {
@@ -176,6 +180,13 @@ export const getSetting = async key => {
   } else {
     return null;
   }
+};
+
+export const updateSetting = async (db, key, value) => {
+  await db.executeSql('UPDATE settings SET value = ? WHERE key = ?', [
+    value,
+    key,
+  ]);
 };
 
 export const parseFeed = async url => {

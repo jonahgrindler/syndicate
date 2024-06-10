@@ -10,6 +10,7 @@ import {
   FlatList,
   ScrollView,
   TextInput,
+  Switch,
 } from 'react-native';
 import {FeedProps, FeedItem} from '../types/FeedTypes';
 import {RootStackParamList} from '../types/RootStackParamList';
@@ -26,6 +27,7 @@ import ResetDatabase from './ResetDatabase';
 import allColors from '../data/allColors';
 
 const Settings: React.FC = ({feedContent}) => {
+  const {linkBehavior, setLinkBehavior} = useFeed();
   const {setTheme, primaryColor, secondaryColor, highlightColor} = useTheme();
   const insets = useSafeAreaInsets();
 
@@ -73,17 +75,9 @@ const Settings: React.FC = ({feedContent}) => {
     setTheme(newPrimaryColor, newSecondaryColor, newHighlightColor);
   };
 
-  // const navigation =
-  //   useNavigation<
-  //     NativeStackNavigationProp<RootStackParamList, 'HomeScreen'>
-  //   >();
-  // const handleNavigation = (item: FeedItem) => {
-  //   console.log('item:', item);
-  //   navigation.navigate('FeedWebView', {
-  //     url: item.link,
-  //     postId: item.post_unique_id,
-  //   });
-  // };
+  const toggleSwitch = () => {
+    setLinkBehavior(linkBehavior === 'webview' ? 'browser' : 'webview');
+  };
 
   return (
     <ScrollView style={[styles.scrollView, {paddingTop: insets.top + 8}]}>
@@ -139,22 +133,50 @@ const Settings: React.FC = ({feedContent}) => {
             ]}
           />
         </View>
-        <TouchableOpacity
-          onPress={randomColors}
-          style={[styles.button, {borderColor: primaryColor}]}>
-          <Text style={[styles.buttonText, {color: primaryColor}]}>
-            Random Colors
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          onPress={originalColors}
-          style={[styles.button, {borderColor: primaryColor}]}>
-          <Text style={[styles.buttonText, {color: primaryColor}]}>
-            Default Colors
-          </Text>
-        </TouchableOpacity>
+        <View style={styles.randomButtons}>
+          <TouchableOpacity
+            onPress={randomColors}
+            style={[styles.button, {borderColor: primaryColor}]}>
+            <Text style={[styles.buttonText, {color: primaryColor}]}>
+              Random Colors
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={originalColors}
+            style={[styles.button, {borderColor: primaryColor}]}>
+            <Text style={[styles.buttonText, {color: primaryColor}]}>
+              Default Colors
+            </Text>
+          </TouchableOpacity>
+        </View>
       </View>
       {/* TODO : Safari options - open in browser or app */}
+      <View style={styles.section}>
+        <DashedLine
+          dashLength={3}
+          dashThickness={3}
+          dashGap={5}
+          dashColor={primaryColor}
+          dashStyle={{borderRadius: 5, marginBottom: 8}}
+        />
+        <Text style={[styles.smallTitle, {color: primaryColor}]}>Reading</Text>
+        <View style={styles.sectionContent}>
+          <View style={styles.row}>
+            <Text style={[styles.buttonText, {color: primaryColor}]}>
+              Open links in browser
+            </Text>
+            <Switch
+              trackColor={{false: secondaryColor, true: primaryColor}}
+              thumbColor={
+                linkBehavior === 'browser' ? highlightColor : secondaryColor
+              }
+              ios_backgroundColor={primaryColor}
+              onValueChange={toggleSwitch}
+              value={linkBehavior === 'browser'}
+            />
+          </View>
+        </View>
+      </View>
       <View style={styles.section}>
         <DashedLine
           dashLength={3}
@@ -193,6 +215,7 @@ const styles = StyleSheet.create({
     flex: 0,
     flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'center',
   },
   text: {
     fontSize: 22,
@@ -211,13 +234,17 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     borderWidth: 2,
   },
+  randomButtons: {
+    gap: 8,
+    marginTop: 16,
+  },
   button: {
     flex: 1,
     height: spacing.row,
     alignItems: 'center',
     justifyContent: 'center',
     // margin: spacing.leftRightMargin,
-    marginTop: 16,
+    // marginTop: 8,
     borderRadius: 24,
     borderWidth: 2,
   },

@@ -63,6 +63,8 @@ const FeedContext = createContext({
   handleRenameFeed: () => {},
   handleDelete: () => {},
   showSettings: {},
+  linkBehavior: 'webview',
+  setLinkBehavior: () => {},
   loading: true,
   setLoading: () => {},
   // Folders
@@ -96,6 +98,7 @@ export const FeedProvider = ({children}) => {
   const [folderFeeds, setFolderFeeds] = useState([]);
   const [allFolderPosts, setAllFolderPosts] = useState([]);
   const [selectedFolderTitle, setSelectedFolderTitle] = useState('');
+  const [linkBehavior, setLinkBehavior] = useState('webview');
 
   // Initialize and load feeds
   useEffect(() => {
@@ -112,6 +115,22 @@ export const FeedProvider = ({children}) => {
     };
     initializeAndLoadFeeds();
   }, []);
+
+  useEffect(() => {
+    const loadSettings = async () => {
+      const db = await getDBConnection();
+      await createSettingsTable(db);
+      const linkBehaviorSetting = await getSetting(db, 'linkBehavior');
+      setLinkBehavior(linkBehaviorSetting || 'webview');
+    };
+    loadSettings();
+  }, []);
+
+  const toggleLinkBehavior = async () => {
+    const newBehavior = linkBehavior === 'webview' ? 'browser' : 'webview';
+    await saveSetting('linkBehavior', newBehavior);
+    setLinkBehavior(newBehavior);
+  };
 
   const fetchAndStoreFeeds = async () => {
     setLoading(true);
@@ -146,7 +165,6 @@ export const FeedProvider = ({children}) => {
           post_unique_id: item.uniqueId,
         });
       }
-      console.log('posts', posts);
       // Sort posts by date
       posts.sort((a, b) => new Date(b.published) - new Date(a.published));
 
@@ -405,6 +423,7 @@ export const FeedProvider = ({children}) => {
   return (
     <FeedContext.Provider
       value={{
+        // Feeds
         feeds,
         feedData,
         selectedFeedId,
@@ -417,6 +436,7 @@ export const FeedProvider = ({children}) => {
         refreshFeeds,
         allPosts,
         loadAllPosts,
+        // Saves
         savedPosts,
         handleSavePost,
         handleUnsavePost,
@@ -424,7 +444,10 @@ export const FeedProvider = ({children}) => {
         toggleFeedShowInEverything,
         handleRenameFeed,
         handleDelete,
+        // Settings
         showSettings,
+        linkBehavior,
+        setLinkBehavior: toggleLinkBehavior,
         loading,
         // Folders
         folders,
