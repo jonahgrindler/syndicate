@@ -136,6 +136,7 @@ const AddFeed: React.FC = () => {
         style={styles.suggestionList}
         sections={sections}
         stickySectionHeadersEnabled={false}
+        keyboardShouldPersistTaps="handled"
         keyExtractor={(item, index) => index.toString()}
         renderSectionHeader={({section: {title}}) => (
           <>
